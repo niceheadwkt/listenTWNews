@@ -20,7 +20,31 @@
 - **廣播技術**：HTML5 Audio API, [Hls.js](https://github.com/video-dev/hls.js/) (支援 HLS `.m3u8` 格式串流)
 - **圖示庫**：[Lucide Icons](https://lucide.dev/) (CDN 加載)
 
-## 🚀 手機安裝與運行指南
+## 📱 手機安裝與使用
+
+### 1️⃣ 本機開發與測試
+- **啟動本機伺服器**（已於「技術架構」說明）：
+  ```bash
+  python -m http.server 8000
+  # 或使用 Node.js
+  npx serve .
+  ```
+- **在同一 Wi‑Fi 網路的手機上開啟** `http://<本機 IP>:8000`，即可預覽 UI。
+- **Optional – 使用 ngrok 建立 HTTPS 隧道**（方便在 iOS Safari 測試 PWA 安裝）：
+  ```bash
+  npm install -g ngrok   # 若未安裝
+  ngrok http 8000
+  ```
+  產生類似 `https://abcd1234.ngrok.io` 的安全 URL，手機直接訪問即可。
+
+### 2️⃣ 部署至雲端（正式使用）
+參考下方 **部署至雲端** 章節將專案推送至 GitHub Pages、Vercel 或 Netlify，取得公開的 HTTPS 網址。
+
+### 3️⃣ 手機安裝 PWA
+- **iOS (Safari)**：打開 HTTPS 網址 → 點擊底部「分享」按鈕 → 向下滑動 → 選擇 **「加入主畫面」**。
+- **Android (Chrome)**：打開 HTTPS 網址 → 右上角選單 → 點選 **「安裝應用程式」**，或在瀏覽器底部彈出提示時直接安裝。
+
+安裝完成後，手機桌面會出現霓虹發光的收音機圖示，點擊即可全螢幕使用，無瀏覽器工具列。
 
 PWA 的安裝功能在手機上**必須透過 HTTPS 協定或本地 localhost 運行**才能被瀏覽器偵測並安裝。
 
@@ -57,25 +81,94 @@ npx serve .
 ---
 ## 🚀 部署至雲端 (免費且支援 HTTPS)
 
-本專案可部署至提供免費 HTTPS 的靜態網站託管平台，例如 **GitHub Pages、Vercel、Netlify**，只要將專案推送至遠端倉庫即可自動部署。
+### Vercel（一步部署）
 
-### GitHub Pages（推薦步驟）
+1. 前往 **Vercel** 官網，使用 GitHub 帳號登入，授權 Vercel 存取您的倉庫。
+2. 點擊 **New Project**，在專案列表中找到 `niceheadwkt/listenTWNews`，點選 **Import**。
+3. **Framework Preset** 選擇 **Other**（因為本專案是純靜態檔案），**Root Directory** 保持空白，**Output Directory** 設為 `/`（即根目錄）。
+4. 若您希望自動部署每次 push，確保 **Git Integration** 已啟用（預設即為啟用）。
+5. 點擊 **Deploy**，Vercel 會即時建立 **Preview** 部署，URL 形如 `https://<project>-<hash>.vercel.app`，您可點擊進入預覽。
+6. 部署完成後，Vercel 會提供正式的 **Production** URL：`https://<project>.vercel.app`。此 URL 已支援 **HTTPS**，可直接用於手機安裝 PWA。
+7. **自訂網域**（可選）：
+   - 前往 Vercel 專案的 **Settings → Domains**，點 **Add**，輸入您已在 DNS 中指向 Vercel 的域名（CNAME 指向 `cname.vercel-dns.com`）。
+   - 完成後即會得到 `https://yourdomain.com` 的安全連結。
 
-1. 前往 GitHub 倉庫的 **Settings → Pages**。
-2. 在 **Source** 選擇 `gh‑pages` 分支（或 `master` / `main` 並設定根目錄 `/`）。
-3. 點擊 **Save**，GitHub 會在 `https://<username>.github.io/<repo>/` 建立 HTTPS 網站。
-4. 若需要自訂域名，於 **Custom domain** 欄位填入您的域名，並在 DNS 中新增 `CNAME` 記錄指向 GitHub 提供的主機名。
+> **提示**：Vercel 會自動快取靜態資源，且支援 Service Worker，無需額外設定。
 
-### Vercel / Netlify（一步部署）
+### Netlify（一步部署）
 
-1. 前往 Vercel（或 Netlify）官網，使用 GitHub 帳號登入。
-2. 點擊 **New Project**，選擇 `niceheadwkt/listenTWNews` 倉庫。
-3. 保持預設建置指令（`npm run build` 若有，若為純靜態則留空）與發佈目錄（`/`）。
-4. 部署完成後會取得 `https://<project>.vercel.app`（或 `*.netlify.app`）的 HTTPS 連結。
+1. 前往 Netlify 官網，使用 GitHub 登入。
+2. 點擊 **New site from Git**，選擇 `niceheadwkt/listenTWNews` 倉庫。
+3. 保持建置指令空白（或 `npm run build` 若未使用），發佈目錄設為 `/`。
+4. 完成部署後取得 `https://<project>.netlify.app` 的 HTTPS 連結。
 
-> **備註**：若您使用 GitHub Actions 自動部署，記得在 `manifest.json` 中的 `start_url` 與 `scope` 保持相對路徑，以免在不同網域產生 CORS/Service Worker 問題。
+> **備註**：若您使用 GitHub Actions 自動部署，請在 `manifest.json` 中的 `start_url` 與 `scope` 保持相對路徑，以免在不同網域產生 CORS/Service Worker 問題。
 
 ---
+
+## 🛠️ 開發環境設定
+
+```bash
+# 啟動本機伺服器（已在上方說明）
+python -m http.server 8000   # 或使用 Node.js
+npx serve .
+```
+
+- 確保已安裝 **Node.js**（若使用 `npx serve`）或 **Python 3**。
+- 本專案僅使用 **Vanilla** 前端，無需額外套件，即可直接在瀏覽器開啟 `index.html`。
+
+## ⚙️ 功能說明
+
+- **電視直播**：支援 YouTube **Channel ID** 與普通 **Video ID**，自動導向最新直播畫面。
+- **廣播音訊**：支援 `.mp3`、`.m3u8` 等 HTTPS 串流，使用 HTML5 Audio 或 Hls.js 播放。
+- **純聽模式**：隱藏影片畫面，只保留音量與視覺化音波特效。
+- **自訂頻道**：使用者可自行新增 YouTube 或音訊串流，資料儲存於 `localStorage`。
+- **離線快取**：透過 Service Worker (`sw.js`) 快取 UI 與資源，即使離線亦可使用介面。
+
+## 🔧 常見問題與除錯
+
+- **為何部分電視台無聲音？** 已改用 YouTube **Channel ID**，避免影片 ID 失效導致無聲。
+- **CORS 錯誤**：確保所有串流使用 **HTTPS**；若仍出現跨域問題，可在 `manifest.json` 中確認 `start_url` 與 `scope` 為相對路徑。
+- **Service Worker 未啟動**：檢查瀏覽器是否在 **HTTPS** 或 `localhost` 環境；在開發時可暫時關閉快取以便除錯。
+
+## 🤝 貢獻指南
+
+1. Fork 本倉庫。
+2. 建立新分支並完成修改。
+3. 提交 Pull Request，請在 PR 內說明變更內容與測試方式。
+4. 盡可能遵循現有程式碼風格，保持 **ESLint**（若加入）的一致性。
+
+## 📄 版權與授權
+
+本專案採用 **MIT License**（`LICENSE`）。
+- 圖示使用 **Lucide Icons**（MIT），向量圖 `icon.svg` 為自製。
+- 音訊串流與 YouTube API 採用各自服務條款。
+
+## 🙏 致謝
+
+- **Lucide** 團隊提供精美開源圖示。
+- **Hls.js** 開源社群讓我們能支援 `.m3u8` 串流。
+- 感謝所有提供測試串流的電視台與廣播站。
+
+## 📦 下載 / 直接體驗
+
+- **GitHub Pages**：<https://niceheadwkt.github.io/listenTWNews/>（自動部署）
+- **Vercel**：<https://listenTWNews.vercel.app/>（示範部署）
+
+## 🗓️ 更新日誌
+
+請參考 `CHANGELOG.md`（若尚未建立，可自行新增），紀錄每次功能更新與錯誤修正。
+
+## 🚧 未來規劃
+
+- 支援多語系介面（英文、繁體中文）。
+- 離線音訊緩存與背景播放。
+- 將專案打包為原生 Android/iOS 應用（使用 Capacitor / TWA）。
+- 增加更多新聞頻道的自動抓取腳本。
+
+---
+
+## 📝 如何設定與加入自訂新聞
 
 當您想要加入特定的新聞直播時，可以點選介面上的 **「自訂頻道」** 分頁，在表單中輸入以下資訊：
 
