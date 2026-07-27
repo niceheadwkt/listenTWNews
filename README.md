@@ -55,8 +55,27 @@ npx serve .
    - **Android (Chrome)**：點擊右上角選單 → 選擇 **「安裝應用程式」**，或在瀏覽器底部彈出提示時直接安裝。
 4. 完成安裝後，您的手機桌面會出現霓虹發光的收音機圖示，點擊即可全螢幕使用，無瀏覽器工具列。
 ---
+## 🚀 部署至雲端 (免費且支援 HTTPS)
 
-## 📝 如何設定與加入自訂新聞
+本專案可部署至提供免費 HTTPS 的靜態網站託管平台，例如 **GitHub Pages、Vercel、Netlify**，只要將專案推送至遠端倉庫即可自動部署。
+
+### GitHub Pages（推薦步驟）
+
+1. 前往 GitHub 倉庫的 **Settings → Pages**。
+2. 在 **Source** 選擇 `gh‑pages` 分支（或 `master` / `main` 並設定根目錄 `/`）。
+3. 點擊 **Save**，GitHub 會在 `https://<username>.github.io/<repo>/` 建立 HTTPS 網站。
+4. 若需要自訂域名，於 **Custom domain** 欄位填入您的域名，並在 DNS 中新增 `CNAME` 記錄指向 GitHub 提供的主機名。
+
+### Vercel / Netlify（一步部署）
+
+1. 前往 Vercel（或 Netlify）官網，使用 GitHub 帳號登入。
+2. 點擊 **New Project**，選擇 `niceheadwkt/listenTWNews` 倉庫。
+3. 保持預設建置指令（`npm run build` 若有，若為純靜態則留空）與發佈目錄（`/`）。
+4. 部署完成後會取得 `https://<project>.vercel.app`（或 `*.netlify.app`）的 HTTPS 連結。
+
+> **備註**：若您使用 GitHub Actions 自動部署，記得在 `manifest.json` 中的 `start_url` 與 `scope` 保持相對路徑，以免在不同網域產生 CORS/Service Worker 問題。
+
+---
 
 當您想要加入特定的新聞直播時，可以點選介面上的 **「自訂頻道」** 分頁，在表單中輸入以下資訊：
 
