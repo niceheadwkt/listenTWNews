@@ -108,6 +108,16 @@ npx serve .
 
 ---
 
+## 📦 部署平台與 `git push` 關係
+
+- **GitHub**：執行 `git push origin <branch>` 只會把本機提交推送到 GitHub 上的遠端倉庫。
+- **Vercel** 與 **Netlify**：透過 **GitHub Integration** 監控該倉庫，當 GitHub 收到新 commit 後會自動觸發部署，無需額外指令。
+- 如需手動觸發，可使用各平台 CLI（`vercel --prod`、`netlify deploy --prod`）。
+
+> **小提示**：只要完成 `git add . && git commit -m "..." && git push`，兩個平台都會自動重新部署最新版本。
+
+## 🛠️ 開發環境設定
+
 ## 🛠️ 開發環境設定
 
 ```bash
