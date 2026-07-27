@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台灣新聞全球收聽台 - Taiwan News Radio & TV</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- HLS.js (for HLS m3u8 stream support in browser) -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- PWA Meta Tags & Mobile Support -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#00f2fe">
+    
+    <!-- iOS Safari Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="TW新聞收聽">
+    <link rel="apple-touch-icon" href="icon.svg">
+</head>
+<body>
+    <div class="glow-bg"></div>
+    <div class="app-container">
+        <!-- Sidebar / Navigation -->
+        <header class="app-header">
+            <div class="logo-area">
+                <i data-lucide="radio" class="logo-icon"></i>
+                <div class="title-wrapper">
+                    <h1>TW News Reader</h1>
+                    <p>台灣新聞語音 & 廣播收聽台 (純聽無螢幕版)</p>
+                </div>
+            </div>
+            <div class="header-status">
+                <span class="status-indicator online"></span>
+                <span class="status-text">連線正常</span>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="app-main">
+            <!-- Left Side: Player -->
+            <section class="player-section">
+                <div class="glass-card player-card">
+                    <!-- Current Channel Info -->
+                    <div class="current-channel-info">
+                        <div class="channel-badge" id="player-channel-type">準備就緒</div>
+                        <h2 id="player-channel-title">請選擇頻道開始收聽</h2>
+                        <p id="player-channel-desc">支援電視新聞音訊與廣播電台串流，節省手機螢幕頻寬電力</p>
+                    </div>
+
+                    <!-- 主視覺與播放容器區域 (影片在底層，音波遮罩在頂層覆蓋) -->
+                    <div class="visualizer-and-player-wrapper">
+                        <!-- 底層實體播放器 (維持 100% 寬高，使瀏覽器准予自動播放聲音) -->
+                        <div class="video-container-wrapper" id="video-wrapper">
+                            <div id="youtube-player"></div>
+                        </div>
+
+                        <!-- 頂層不透明遮罩與動態音波 (完全擋住底層影片) -->
+                        <div class="audio-visualizer-container" id="audio-visualizer">
+                            <div class="visualizer-bars">
+                                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                                <div class="bar"></div><div class="bar"></div>
+                            </div>
+                            <p class="visualizer-status" id="visualizer-status-text">請點選下方新聞頻道</p>
+                        </div>
+                    </div>
+
+                    <!-- Custom Player Controls -->
+                    <div class="player-controls">
+                        <button class="control-btn" id="play-pause-btn" disabled>
+                            <i data-lucide="play"></i>
+                        </button>
+                        <div class="volume-control">
+                            <i data-lucide="volume-2" id="volume-icon"></i>
+                            <input type="range" id="volume-slider" min="0" max="100" value="80">
+                            <span id="volume-value">80%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 隱藏的 HTML5 Audio 元素 -->
+                <audio id="audio-player" style="display: none;"></audio>
+            </section>
+
+            <!-- Right Side: Channel List & Management -->
+            <section class="list-section">
+                <!-- Navigation Tabs -->
+                <div class="tabs-container">
+                    <button class="tab-btn active" data-tab="tv">
+                        <i data-lucide="tv"></i>
+                        <span>電視新聞</span>
+                    </button>
+                    <button class="tab-btn" data-tab="radio">
+                        <i data-lucide="mic"></i>
+                        <span>廣播電台</span>
+                    </button>
+                    <button class="tab-btn" data-tab="custom">
+                        <i data-lucide="heart"></i>
+                        <span>自訂頻道</span>
+                    </button>
+                </div>
+
+                <!-- Tab Contents -->
+                <div class="tab-content-container">
+                    <!-- TV Channels -->
+                    <div class="tab-pane active" id="tab-tv">
+                        <div class="channel-grid" id="tv-channel-list">
+                            <!-- JS Dynamically Populated -->
+                        </div>
+                    </div>
+
+                    <!-- Radio Channels -->
+                    <div class="tab-pane" id="tab-radio">
+                        <div class="channel-grid" id="radio-channel-list">
+                            <!-- JS Dynamically Populated -->
+                        </div>
+                    </div>
+
+                    <!-- Custom Channels -->
+                    <div class="tab-pane" id="tab-custom">
+                        <div class="custom-management">
+                            <div class="add-channel-box glass-card">
+                                <h3><i data-lucide="plus-circle"></i> 新增自訂頻道</h3>
+                                <form id="add-channel-form">
+                                    <div class="form-group">
+                                        <label for="new-channel-name">頻道名稱</label>
+                                        <input type="text" id="new-channel-name" placeholder="例如：我的自訂新聞" required>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="new-channel-type">頻道類型</label>
+                                            <select id="new-channel-type" required>
+                                                <option value="youtube">YouTube 直播 (純聽音訊)</option>
+                                                <option value="audio">廣播/音訊串流 (MP3/HLS)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="new-channel-url">直播網址 或 YouTube 影片 ID</label>
+                                        <input type="text" id="new-channel-url" placeholder="輸入網址，例 https://www.youtube.com/watch?v=..." required>
+                                        <small class="form-help">支援 YouTube 影片連結或 .mp3 / .m3u8 串流網址</small>
+                                    </div>
+                                    <button type="submit" class="submit-btn">
+                                        <i data-lucide="plus"></i> 加入頻道清單
+                                    </button>
+                                </form>
+                            </div>
+                            
+                            <div class="custom-channels-list-wrapper">
+                                <h3>您的自訂頻道</h3>
+                                <div class="channel-grid" id="custom-channel-list">
+                                    <!-- JS Dynamically Populated -->
+                                    <div class="empty-state">
+                                        <i data-lucide="heart"></i>
+                                        <p>目前沒有自訂頻道，請在上方新增！</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- YouTube Iframe API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <!-- Core Application Logic -->
+    <script src="app.js"></script>
+
+    <!-- Register PWA Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then((reg) => console.log('Service Worker 註冊成功，範圍：', reg.scope))
+                    .catch((err) => console.error('Service Worker 註冊失敗：', err));
+            });
+        }
+    </script>
+</body>
+</html>

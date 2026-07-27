@@ -1,0 +1,826 @@
+/* ==========================================
+   台灣新聞收聽 App - 核心設計系統與樣式
+   ========================================== */
+
+/* 變數定義 */
+:root {
+    --bg-dark: #090a0f;
+    --bg-card: rgba(18, 20, 28, 0.65);
+    --bg-card-hover: rgba(26, 29, 41, 0.85);
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-active: rgba(0, 242, 254, 0.5);
+    
+    /* 霓虹與漸層配色 */
+    --primary-neon: #00f2fe; /* 藍青 */
+    --secondary-neon: #4facfe; /* 亮藍 */
+    --accent-neon: #ff007f; /* 品紅 */
+    --success-green: #39ff14; /* 螢光綠 */
+    
+    /* 文字顏色 */
+    --text-primary: #f5f6fa;
+    --text-muted: #8b949e;
+    --text-active: #00f2fe;
+    
+    /* 字型 */
+    --font-sans: 'Outfit', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    
+    /* 陰影與發光 */
+    --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    --neon-glow: 0 0 15px rgba(0, 242, 254, 0.3);
+    --accent-glow: 0 0 15px rgba(255, 0, 127, 0.3);
+    
+    /* 過渡效果 */
+    --transition-smooth: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* 基本重設 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    scrollbar-width: thin;
+    scrollbar-color: var(--secondary-neon) var(--bg-dark);
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* 霓虹背景發光圓 */
+.glow-bg {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(79, 172, 254, 0.15) 0%, rgba(255, 0, 127, 0.05) 50%, rgba(0, 0, 0, 0) 100%);
+    filter: blur(80px);
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* 捲動條樣式 */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 242, 254, 0.3);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-neon);
+    box-shadow: var(--neon-glow);
+}
+
+/* App 容器與版面配置 */
+.app-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header 樣式 */
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 25px;
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    margin-bottom: 20px;
+    box-shadow: var(--card-shadow);
+}
+
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo-icon {
+    width: 32px;
+    height: 32px;
+    color: var(--primary-neon);
+    filter: drop-shadow(0 0 8px rgba(0, 242, 254, 0.6));
+    animation: pulse 2s infinite ease-in-out;
+}
+
+.title-wrapper h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    background: linear-gradient(135deg, var(--primary-neon), var(--secondary-neon));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.title-wrapper p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.header-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+}
+
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.status-indicator.online {
+    background-color: var(--success-green);
+    box-shadow: 0 0 10px var(--success-green);
+}
+
+.status-text {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* 主要排版 */
+.app-main {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 20px;
+    flex-grow: 1;
+}
+
+/* 玻璃擬態卡片通用樣式 */
+.glass-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    box-shadow: var(--card-shadow);
+    transition: var(--transition-smooth);
+}
+
+/* 播放器區塊 */
+.player-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.player-card {
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 520px;
+    position: relative;
+    overflow: hidden;
+}
+
+.current-channel-info {
+    margin-bottom: 20px;
+}
+
+.channel-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    background: linear-gradient(135deg, var(--primary-neon), var(--secondary-neon));
+    color: #000;
+    font-size: 0.7rem;
+    font-weight: 800;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 10px rgba(0, 242, 254, 0.2);
+}
+
+#player-channel-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    line-height: 1.2;
+}
+
+#player-channel-desc {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* 雙層播放面板外層 */
+.visualizer-and-player-wrapper {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%; /* 16:9 比例 */
+    height: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    background: #000;
+    flex-grow: 1;
+    margin-bottom: 20px;
+}
+
+/* 底層實體影片播放器（大小正常，以規避 Autoplay Policy 的隱形靜音阻擋） */
+.video-container-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.video-container-wrapper iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* 頂層遮罩與動態音波（覆蓋底層影片，實現視覺上的「純聽無螢幕」） */
+.audio-visualizer-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    background: radial-gradient(circle, #0f111a 0%, #090a0f 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    pointer-events: none; /* 讓點擊穿透到下方的播放器（如有需要），或保持 auto 來阻擋控制項 */
+}
+
+.visualizer-bars {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 6px;
+    height: 100px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.bar {
+    width: 8px;
+    height: 6px;
+    background: linear-gradient(to top, var(--secondary-neon), var(--primary-neon));
+    border-radius: 4px;
+    transition: height 0.1s ease;
+}
+
+/* 當播放時，由 JS 動態添加 active class */
+.audio-visualizer-container.playing .bar {
+    animation: bounce 1.2s infinite alternate ease-in-out;
+}
+
+/* 為每個 bar 設定不同的動畫延遲，達到波浪效果 */
+.audio-visualizer-container.playing .bar:nth-child(2n) { animation-delay: 0.1s; }
+.audio-visualizer-container.playing .bar:nth-child(3n) { animation-delay: 0.25s; animation-duration: 0.8s; }
+.audio-visualizer-container.playing .bar:nth-child(4n) { animation-delay: 0.4s; animation-duration: 1.4s; }
+.audio-visualizer-container.playing .bar:nth-child(5n) { animation-delay: 0.15s; }
+.audio-visualizer-container.playing .bar:nth-child(6n) { animation-delay: 0.3s; animation-duration: 0.9s; }
+.audio-visualizer-container.playing .bar:nth-child(7n) { animation-delay: 0.5s; animation-duration: 1.3s; }
+.audio-visualizer-container.playing .bar:nth-child(8n) { animation-delay: 0.2s; }
+.audio-visualizer-container.playing .bar:nth-child(9n) { animation-delay: 0.45s; }
+.audio-visualizer-container.playing .bar:nth-child(10n) { animation-delay: 0.1s; }
+
+.visualizer-status {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    transition: var(--transition-smooth);
+}
+
+.audio-visualizer-container.playing .visualizer-status {
+    color: var(--primary-neon);
+    text-shadow: var(--neon-glow);
+}
+
+/* 自訂播放控制器 */
+.player-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    padding: 12px 20px;
+    border-radius: 12px;
+    gap: 15px;
+}
+
+.control-btn {
+    background: linear-gradient(135deg, var(--primary-neon), var(--secondary-neon));
+    color: #000;
+    border: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: var(--neon-glow);
+    transition: var(--transition-smooth);
+}
+
+.control-btn:hover:not(:disabled) {
+    transform: scale(1.08);
+    box-shadow: 0 0 20px rgba(0, 242, 254, 0.6);
+}
+
+.control-btn:disabled {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.control-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+.volume-control {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-grow: 1;
+}
+
+.volume-control svg {
+    color: var(--text-muted);
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+}
+
+.volume-control svg:hover {
+    color: var(--primary-neon);
+}
+
+.volume-control input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 5px;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.1);
+    outline: none;
+    cursor: pointer;
+}
+
+.volume-control input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--primary-neon);
+    box-shadow: var(--neon-glow);
+    transition: var(--transition-smooth);
+}
+
+.volume-control input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+#volume-value {
+    font-size: 0.8rem;
+    font-weight: 600;
+    min-width: 40px;
+    color: var(--text-muted);
+}
+
+/* 頻道列表與管理 */
+.list-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* 分頁切換選單 */
+.tabs-container {
+    display: flex;
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 6px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--card-shadow);
+}
+
+.tab-btn {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 10px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+}
+
+.tab-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.tab-btn.active {
+    color: #000;
+    background: linear-gradient(135deg, var(--primary-neon), var(--secondary-neon));
+    box-shadow: var(--neon-glow);
+}
+
+.tab-btn.active svg {
+    stroke-width: 2.5;
+}
+
+/* 分頁內容 */
+.tab-content-container {
+    flex-grow: 1;
+    min-height: 480px;
+}
+
+.tab-pane {
+    display: none;
+    height: 100%;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+/* 頻道卡片格線 */
+.channel-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 520px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+/* 頻道卡片設計 */
+.channel-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+}
+
+.channel-card:hover {
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+    border-color: rgba(0, 242, 254, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 242, 254, 0.1);
+}
+
+.channel-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background: transparent;
+    transition: var(--transition-smooth);
+}
+
+.channel-card.playing {
+    border-color: var(--primary-neon);
+    box-shadow: var(--neon-glow);
+    background: rgba(0, 242, 254, 0.05);
+}
+
+.channel-card.playing::before {
+    background: var(--primary-neon);
+    box-shadow: 0 0 10px var(--primary-neon);
+}
+
+.channel-main {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.channel-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--text-muted);
+    transition: var(--transition-smooth);
+}
+
+.channel-card:hover .channel-icon-wrapper {
+    background: rgba(0, 242, 254, 0.1);
+    color: var(--primary-neon);
+}
+
+.channel-card.playing .channel-icon-wrapper {
+    background: rgba(0, 242, 254, 0.2);
+    color: var(--primary-neon);
+}
+
+.channel-details h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+    transition: var(--transition-smooth);
+}
+
+.channel-card.playing .channel-details h4 {
+    color: var(--primary-neon);
+}
+
+.channel-details p {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.play-state-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+}
+
+.channel-card.playing .play-state-indicator {
+    color: var(--primary-neon);
+    animation: heartbeat 1.5s infinite alternate;
+}
+
+/* 刪除自訂頻道按鈕 */
+.delete-channel-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: var(--transition-smooth);
+    z-index: 5;
+}
+
+.delete-channel-btn:hover {
+    background: rgba(255, 0, 127, 0.15);
+    color: var(--accent-neon);
+}
+
+/* 自訂管理面版 */
+.custom-management {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.add-channel-box {
+    padding: 20px;
+}
+
+.add-channel-box h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--primary-neon);
+}
+
+.add-channel-box h3 svg {
+    width: 18px;
+    height: 18px;
+}
+
+.form-group {
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.form-group label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+}
+
+.form-group input,
+.form-group select {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    outline: none;
+    transition: var(--transition-smooth);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: var(--primary-neon);
+    box-shadow: 0 0 8px rgba(0, 242, 254, 0.2);
+}
+
+.form-help {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.submit-btn {
+    margin-top: 8px;
+    background: linear-gradient(135deg, var(--secondary-neon), var(--primary-neon));
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    box-shadow: var(--neon-glow);
+    transition: var(--transition-smooth);
+    width: 100%;
+}
+
+.submit-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 20px rgba(0, 242, 254, 0.5);
+}
+
+.custom-channels-list-wrapper h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text-primary);
+}
+
+/* 空白狀態 */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    text-align: center;
+    border: 1px dashed var(--border-color);
+    border-radius: 12px;
+    color: var(--text-muted);
+    gap: 10px;
+}
+
+.empty-state svg {
+    width: 36px;
+    height: 36px;
+    stroke-width: 1;
+}
+
+.empty-state p {
+    font-size: 0.85rem;
+}
+
+/* ==========================================
+   動畫效果
+   ========================================== */
+
+/* 音訊視覺化跳動動畫 */
+@keyframes bounce {
+    0% {
+        height: 6px;
+    }
+    100% {
+        height: 100px;
+    }
+}
+
+/* 呼吸發光動畫 */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+        filter: drop-shadow(0 0 12px rgba(0, 242, 254, 0.8));
+    }
+}
+
+/* 心跳動畫 */
+@keyframes heartbeat {
+    0% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(1.15);
+    }
+}
+
+/* ==========================================
+   響應式版面設定 (Responsive Web Design)
+   ========================================== */
+
+@media (max-width: 992px) {
+    .app-main {
+        grid-template-columns: 1fr;
+    }
+    
+    .player-card {
+        min-height: auto;
+    }
+}
+
+@media (max-width: 576px) {
+    .app-container {
+        padding: 10px;
+    }
+    
+    .app-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+        padding: 15px;
+    }
+    
+    .header-status {
+        align-self: flex-end;
+    }
+    
+    .player-card {
+        padding: 15px;
+    }
+    
+    #player-channel-title {
+        font-size: 1.3rem;
+    }
+    
+    .tabs-container {
+        flex-direction: row;
+        font-size: 0.8rem;
+    }
+    
+    .tab-btn span {
+        display: none; /* 小螢幕只顯示 icon */
+    }
+    
+    .tab-btn svg {
+        margin: 0;
+    }
+}

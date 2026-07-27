@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- 背景漸層 -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090a0f"/>
+      <stop offset="100%" stop-color="#181a25"/>
+    </linearGradient>
+    <!-- 霓虹藍漸層 -->
+    <linearGradient id="neonBlue" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00f2fe"/>
+      <stop offset="100%" stop-color="#4facfe"/>
+    </linearGradient>
+    <!-- 霓虹粉漸層 -->
+    <linearGradient id="neonPink" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ff007f"/>
+      <stop offset="100%" stop-color="#7f00ff"/>
+    </linearGradient>
+    <!-- 發光濾鏡 -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- 圓角背景 -->
+  <rect width="512" height="512" rx="100" fill="url(#bgGrad)"/>
+  
+  <!-- 發光外框 -->
+  <rect x="24" y="24" width="464" height="464" rx="80" fill="none" stroke="url(#neonBlue)" stroke-width="12" filter="url(#glow)"/>
+  
+  <!-- 收音機提把 -->
+  <path d="M 180,210 L 180,160 Q 180,140 200,140 L 312,140 Q 332,140 332,160 L 332,210" fill="none" stroke="url(#neonBlue)" stroke-width="12" stroke-linecap="round"/>
+  
+  <!-- 天線 -->
+  <line x1="256" y1="210" x2="160" y2="90" stroke="url(#neonBlue)" stroke-width="12" stroke-linecap="round"/>
+  <!-- 天線頂端發光球 -->
+  <circle cx="160" cy="90" r="16" fill="url(#neonPink)" filter="url(#glow)"/>
+  
+  <!-- 收音機主機身 -->
+  <rect x="110" y="210" width="292" height="190" rx="20" fill="#1b1e2e" stroke="url(#neonBlue)" stroke-width="12" filter="url(#glow)"/>
+  
+  <!-- 喇叭孔 (左側) -->
+  <circle cx="200" cy="305" r="55" fill="#090a0f" stroke="url(#neonBlue)" stroke-width="6"/>
+  <circle cx="200" cy="305" r="25" fill="url(#neonBlue)"/>
+  
+  <!-- 刻度面板 (右上) -->
+  <rect x="280" y="245" width="90" height="35" rx="8" fill="#090a0f" stroke="url(#neonBlue)" stroke-width="4"/>
+  <!-- 刻度指針 -->
+  <line x1="310" y1="245" x2="310" y2="280" stroke="url(#neonPink)" stroke-width="4"/>
+  
+  <!-- 控制旋鈕 (右下) -->
+  <circle cx="305" cy="335" r="18" fill="url(#neonPink)" filter="url(#glow)"/>
+  <circle cx="355" cy="335" r="14" fill="url(#neonBlue)"/>
+</svg>

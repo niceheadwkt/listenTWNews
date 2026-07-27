@@ -1,0 +1,19 @@
+{
+  "name": "台灣新聞全球收聽台",
+  "short_name": "TW新聞收聽",
+  "description": "提供台灣主流電視新聞直播與廣播電台收聽，支援自訂頻道與純聽模式",
+  "start_url": "./index.html",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#090a0f",
+  "theme_color": "#00f2fe",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
