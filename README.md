@@ -94,6 +94,7 @@ npx serve .
    - 完成後即會得到 `https://yourdomain.com` 的安全連結。
 
 > **提示**：Vercel 會自動快取靜態資源，且支援 Service Worker，無需額外設定。
+> **注意**：若程式碼有變更，只需 `git push`，Vercel 會自動重新部署最新版本。
 
 ### Netlify（一步部署）
 
@@ -103,6 +104,7 @@ npx serve .
 4. 完成部署後取得 `https://<project>.netlify.app` 的 HTTPS 連結。
 
 > **備註**：若您使用 GitHub Actions 自動部署，請在 `manifest.json` 中的 `start_url` 與 `scope` 保持相對路徑，以免在不同網域產生 CORS/Service Worker 問題。
+> **提示**：Netlify 會在每次 `git push` 後自動重新部署最新版本。
 
 ---
 
