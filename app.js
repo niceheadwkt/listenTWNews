@@ -2,7 +2,6 @@
    台灣新聞收聽 App - 核心應用程式邏輯 (純聽無螢幕版)
    ========================================== */
 
-// 預設電視新聞頻道 (可以使用 Video ID 或 Channel ID。對於經常更換 ID 的電視台，使用 Channel ID 可以一勞永逸自動導向直播)
 const DEFAULT_TV_CHANNELS = [
     { id: 'tv-ftv', name: '民視新聞台', desc: 'Formosa TV News 24小時線上直播 (訊號正常發聲)', type: 'youtube', value: 'ylYJSBUgaMA', channelId: 'UC2VmWn8dAqkzlQqvy02E1PA' },
     { id: 'tv-ebc57', name: '東森財經新聞台 (57台)', desc: 'EBC 57台 24小時線上直播 (東森電視官方線上直播訊號)', type: 'youtube', value: 'AEBeWMM1atA', channelId: 'UC5money57' },
@@ -10,7 +9,9 @@ const DEFAULT_TV_CHANNELS = [
     { id: 'tv-ctv', name: '中視新聞台', desc: 'CTV News 資訊台 24小時直播 (訊號正常發聲)', type: 'youtube', value: 'TCnaIE_SAtM', channelId: 'UCmH4q-YjeazayYCVHHkGAMA' },
     { id: 'tv-cts', name: '華視新聞台 (52台)', desc: 'CTS News CH52 資訊台 24小時直播 (訊號正常發聲)', type: 'youtube', value: 'y6120QOlsfU', channelId: 'UCDCJyLpbfgeVE9iZiEam-Kg' },
     { id: 'tv-pts', name: '公視新聞台', desc: 'PTS News 24小時線上直播 (訊號正常發聲)', type: 'youtube', value: 'quwq87002ls', channelId: 'UCexpzYDEnfmAvPSfG4xbcjA' },
-    { id: 'tv-cti', name: '中天新聞台', desc: 'CTI News 24小時線上直播 (訊號正常發聲)', type: 'youtube', value: 'wUPPkSANpyo', channelId: 'UCpu3bemTQwAU8PqM4kJdoEQ' }
+    { id: 'tv-cti', name: '中天新聞台', desc: 'CTI News 24小時線上直播 (訊號正常發聲)', type: 'youtube', value: 'wUPPkSANpyo', channelId: 'UCpu3bemTQwAU8PqM4kJdoEQ' },
+    { id: 'tv-set', name: '三立新聞台', desc: 'SET News 24小時線上直播 (訊號正常發聲)', type: 'youtube', value: 'yeYC0mbSIOo', channelId: 'UC2TuODJhC03pLgd6MpWP0iw' },
+    { id: 'tv-tvbs', name: 'TVBS 新聞台', desc: 'TVBS News 55頻道 24小時直播 (訊號正常發聲)', type: 'youtube', value: 'ylYJSBUgaMA', channelId: 'UC5nwNW4KdC0SzrhF9BXEYOQ' }
 ];
 
 // 預設廣播新聞頻道 (音訊串流)
