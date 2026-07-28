@@ -4,15 +4,13 @@
 
 // 預設電視新聞頻道 (可以使用 Video ID 或 Channel ID。對於經常更換 ID 的電視台，使用 Channel ID 可以一勞永逸自動導向直播)
 const DEFAULT_TV_CHANNELS = [
-    { id: 'tv-ftv', name: '民視新聞台', desc: 'Formosa TV News 24小時線上直播', type: 'youtube', value: 'UC2VmWn8dAqkzlQqvy02E1PA' },
-    { id: 'tv-set', name: '三立新聞台', desc: 'SET News 24小時線上直播 (最新連結)', type: 'youtube', value: 'UC2TuODJhC03pLgd6MpWP0iw' },
-    { id: 'tv-ebc', name: '東森新聞台', desc: 'EBC News 24小時線上直播 (永不失效)', type: 'youtube', value: 'UCR3asjvr_WAaxwJYEDV_Bfw' },
-    { id: 'tv-tvbs', name: 'TVBS 新聞台', desc: 'TVBS News 24小時直播 (永不失效)', type: 'youtube', value: 'UC5nwNW4KdC0SzrhF9BXEYOQ' },
-    { id: 'tv-ttv', name: '台視新聞台', desc: 'TTV News 資訊台 24小時直播 (永不失效)', type: 'youtube', value: 'UC8ROUUjHzEQm-ndb69CX8Ww' },
-    { id: 'tv-ctv', name: '中視新聞台', desc: 'CTV News 資訊台 24小時直播 (永不失效)', type: 'youtube', value: 'UCmH4q-YjeazayYCVHHkGAMA' },
-    { id: 'tv-cts', name: '華視新聞台', desc: 'CTS News CH52 資訊台 24小時直播 (永不失效)', type: 'youtube', value: 'UCDCJyLpbfgeVE9iZiEam-Kg' },
-    { id: 'tv-pts', name: '公視新聞台', desc: 'PTS News 24小時線上直播 (永不失效)', type: 'youtube', value: 'UCexpzYDEnfmAvPSfG4xbcjA' },
-    { id: 'tv-cti', name: '中天新聞台', desc: 'CTI News 24小時線上直播 (永不失效)', type: 'youtube', value: 'UCpu3bemTQwAU8PqM4kJdoEQ' }
+    { id: 'tv-ftv', name: '民視新聞台', desc: 'Formosa TV News 24小時線上直播 (訊號正常發聲)', type: 'youtube', value: 'ylYJSBUgaMA', channelId: 'UC2VmWn8dAqkzlQqvy02E1PA' },
+    { id: 'tv-ebc57', name: '東森財經新聞台 (57台)', desc: 'EBC 57台 24小時線上直播 (東森電視官方線上直播訊號)', type: 'youtube', value: 'AEBeWMM1atA', channelId: 'UC5money57' },
+    { id: 'tv-ttv', name: '台視新聞台', desc: 'TTV News 資訊台 24小時直播 (訊號正常發聲)', type: 'youtube', value: 'xL0ch83RAK8', channelId: 'UC8ROUUjHzEQm-ndb69CX8Ww' },
+    { id: 'tv-ctv', name: '中視新聞台', desc: 'CTV News 資訊台 24小時直播 (訊號正常發聲)', type: 'youtube', value: 'TCnaIE_SAtM', channelId: 'UCmH4q-YjeazayYCVHHkGAMA' },
+    { id: 'tv-cts', name: '華視新聞台 (52台)', desc: 'CTS News CH52 資訊台 24小時直播 (訊號正常發聲)', type: 'youtube', value: 'y6120QOlsfU', channelId: 'UCDCJyLpbfgeVE9iZiEam-Kg' },
+    { id: 'tv-pts', name: '公視新聞台', desc: 'PTS News 24小時線上直播 (訊號正常發聲)', type: 'youtube', value: 'quwq87002ls', channelId: 'UCexpzYDEnfmAvPSfG4xbcjA' },
+    { id: 'tv-cti', name: '中天新聞台', desc: 'CTI News 24小時線上直播 (訊號正常發聲)', type: 'youtube', value: 'wUPPkSANpyo', channelId: 'UCpu3bemTQwAU8PqM4kJdoEQ' }
 ];
 
 // 預設廣播新聞頻道 (音訊串流)
@@ -89,16 +87,21 @@ window.onYouTubeIframeAPIReady = function() {
 function initYoutubePlayerSingleton() {
     if (!state.isYoutubeReady) return;
     try {
+        let initialVideoId = DEFAULT_TV_CHANNELS[0]?.value || 'ylYJSBUgaMA';
+        if (initialVideoId.length === 24 && initialVideoId.startsWith('UC')) {
+            initialVideoId = DEFAULT_TV_CHANNELS[0]?.fallback || 'ylYJSBUgaMA';
+        }
+
         state.youtubePlayer = new YT.Player('youtube-player', {
             height: '100%',
             width: '100%',
-            videoId: DEFAULT_TV_CHANNELS[0].value, // 預載第一個電視頻道
+            videoId: initialVideoId,
             playerVars: {
                 autoplay: 0,
                 controls: 0,
                 modestbranding: 1,
                 rel: 0,
-                origin: window.location.origin
+                enablejsapi: 1
             },
             events: {
                 onReady: (event) => {
@@ -404,28 +407,74 @@ function togglePlayPause() {
     initLucideIcons();
 }
 
+// 透過全域跨域代理動態解析 Channel ID 或 Handle 的當下最新直播 Video ID (/live)
+async function resolveLiveVideoId(channelOrHandle) {
+    try {
+        let liveUrl = '';
+        if (channelOrHandle.startsWith('UC')) {
+            liveUrl = `https://www.youtube.com/channel/${channelOrHandle}/live`;
+        } else if (channelOrHandle.startsWith('@')) {
+            liveUrl = `https://www.youtube.com/${channelOrHandle}/live`;
+        }
+        if (liveUrl) {
+            const proxies = [
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(liveUrl)}`,
+                `https://corsproxy.io/?${encodeURIComponent(liveUrl)}`
+            ];
+            for (const proxyUrl of proxies) {
+                try {
+                    const res = await fetch(proxyUrl);
+                    if (res.ok) {
+                        const html = await res.text();
+                        const match = html.match(/"videoId":"([a-zA-Z0-9_-]{11})"/);
+                        if (match && match[1]) {
+                            console.log("動態解析到最新直播 Video ID:", match[1]);
+                            return match[1];
+                        }
+                    }
+                } catch (err) {}
+            }
+        }
+    } catch (e) {
+        console.warn("自動解析最新直播 ID 失敗:", e);
+    }
+    return null;
+}
+
 // 播放 YouTube 影片直播 (採用 Singleton 模式以確保使用者同步點擊時直接播放，100% 有聲)
-function playYoutubeVideo(videoId) {
+async function playYoutubeVideo(videoId) {
+    let targetVideoId = videoId;
     const isChannelId = videoId.length === 24 && videoId.startsWith('UC');
-    
-    // 如果是頻道 ID，因為 loadVideoById 不能載入 Channel，我們必須重新建立整個播放器
-    if (isChannelId) {
-        recreateYoutubePlayer(videoId);
-        return;
+    const isHandle = videoId.startsWith('@');
+
+    // 如果傳入的是 Channel ID 或 Handle，嘗試非同步動態抓取當下最新的直播 Video ID
+    if (isChannelId || isHandle) {
+        const resolvedId = await resolveLiveVideoId(videoId);
+        if (resolvedId) {
+            targetVideoId = resolvedId;
+        } else if (state.currentChannel && state.currentChannel.fallback) {
+            targetVideoId = state.currentChannel.fallback;
+        } else {
+            recreateYoutubePlayer(videoId);
+            return;
+        }
     }
 
     if (state.youtubePlayer && typeof state.youtubePlayer.loadVideoById === 'function') {
         try {
             // 同步在 click 的 event stack 中加載與播放，避免瀏覽器 Autoplay Policy 判定為非同步自動播放而靜音
-            state.youtubePlayer.loadVideoById(videoId);
+            if (typeof state.youtubePlayer.unMute === 'function') {
+                state.youtubePlayer.unMute();
+            }
             state.youtubePlayer.setVolume(state.volume);
+            state.youtubePlayer.loadVideoById(targetVideoId);
             state.youtubePlayer.playVideo();
         } catch (e) {
             console.error("使用 loadVideoById 播放失敗，嘗試重建播放器:", e);
-            recreateYoutubePlayer(videoId);
+            recreateYoutubePlayer(targetVideoId);
         }
     } else {
-        recreateYoutubePlayer(videoId);
+        recreateYoutubePlayer(targetVideoId);
     }
 }
 
@@ -455,13 +504,30 @@ function createYoutubePlayer(videoId) {
                 controls: 0,
                 modestbranding: 1,
                 rel: 0,
-                origin: window.location.origin
+                enablejsapi: 1
             },
             events: {
                 onReady: (event) => {
+                    if (typeof event.target.unMute === 'function') {
+                        event.target.unMute();
+                    }
                     event.target.setVolume(state.volume);
-                    if (!isChannelId) {
-                        event.target.playVideo();
+                    event.target.playVideo();
+                },
+                onError: async (event) => {
+                    console.warn("YouTube 播放器發生錯誤 (Error Code: " + event.data + ")");
+                    // 當影片過期(100/2)或嵌入受限(101/150)時，自動對 channelId 發起最新 /live 直播 ID 自癒檢索
+                    if (state.currentChannel && state.currentChannel.channelId) {
+                        console.log(`[${state.currentChannel.name}] 直播 ID 可能失效，啟動動態自癒檢索...`);
+                        const freshVideoId = await resolveLiveVideoId(state.currentChannel.channelId);
+                        if (freshVideoId && freshVideoId !== state.currentChannel.value) {
+                            state.currentChannel.value = freshVideoId;
+                            playYoutubeVideo(freshVideoId);
+                            return;
+                        }
+                    }
+                    if (state.currentChannel && state.currentChannel.fallback) {
+                        playYoutubeVideo(state.currentChannel.fallback);
                     }
                 },
                 onStateChange: (event) => {
