@@ -4,12 +4,14 @@
 
 // 預設電視新聞頻道 (可以使用 Video ID 或 Channel ID。對於經常更換 ID 的電視台，使用 Channel ID 可以一勞永逸自動導向直播)
 const DEFAULT_TV_CHANNELS = [
-    { id: 'tv-ftv', name: '民視新聞台', desc: 'Formosa TV News 24小時線上直播', type: 'youtube', value: 'ylYJSBUgaMA' },
-    { id: 'tv-set', name: '三立新聞台', desc: 'SET News 24小時線上直播 (最新連結)', type: 'youtube', value: 'yeYC0mbSIOo' },
+    { id: 'tv-ftv', name: '民視新聞台', desc: 'Formosa TV News 24小時線上直播', type: 'youtube', value: 'UC2VmWn8dAqkzlQqvy02E1PA' },
+    { id: 'tv-set', name: '三立新聞台', desc: 'SET News 24小時線上直播 (最新連結)', type: 'youtube', value: 'UC2TuODJhC03pLgd6MpWP0iw' },
     { id: 'tv-ebc', name: '東森新聞台', desc: 'EBC News 24小時線上直播 (永不失效)', type: 'youtube', value: 'UCR3asjvr_WAaxwJYEDV_Bfw' },
-    { id: 'tv-tvbs', name: 'TVBS 新聞台', desc: 'TVBS News 55頻道 24小時直播 (永不失效)', type: 'youtube', value: 'UC15iL3VpP6f2x_t71bH0oLA' },
-    { id: 'tv-cts', name: '華視新聞台', desc: 'CTS News 資訊台 24小時直播 (永不失效)', type: 'youtube', value: 'UCDCJyLpbfgeVE9iZiEam-Kg' },
-    { id: 'tv-pts', name: '公視新聞台', desc: 'PTS News 24小時線上直播 (永不失效)', type: 'youtube', value: 'UCyV76eYq5n1R9qF9rG9Z-0A' },
+    { id: 'tv-tvbs', name: 'TVBS 新聞台', desc: 'TVBS News 24小時直播 (永不失效)', type: 'youtube', value: 'UC5nwNW4KdC0SzrhF9BXEYOQ' },
+    { id: 'tv-ttv', name: '台視新聞台', desc: 'TTV News 資訊台 24小時直播 (永不失效)', type: 'youtube', value: 'UC8ROUUjHzEQm-ndb69CX8Ww' },
+    { id: 'tv-ctv', name: '中視新聞台', desc: 'CTV News 資訊台 24小時直播 (永不失效)', type: 'youtube', value: 'UCmH4q-YjeazayYCVHHkGAMA' },
+    { id: 'tv-cts', name: '華視新聞台', desc: 'CTS News CH52 資訊台 24小時直播 (永不失效)', type: 'youtube', value: 'UCDCJyLpbfgeVE9iZiEam-Kg' },
+    { id: 'tv-pts', name: '公視新聞台', desc: 'PTS News 24小時線上直播 (永不失效)', type: 'youtube', value: 'UCexpzYDEnfmAvPSfG4xbcjA' },
     { id: 'tv-cti', name: '中天新聞台', desc: 'CTI News 24小時線上直播 (永不失效)', type: 'youtube', value: 'UCpu3bemTQwAU8PqM4kJdoEQ' }
 ];
 
@@ -612,17 +614,31 @@ function updatePlayingStatusUI() {
    自訂頻道新增與刪除
    ========================================== */
 
-// 解析 YouTube 網址取得 Video ID
+// 解析 YouTube 網址取得 Video ID 或 Channel ID (支援 /channel/UC.../live 直播捷徑)
 function extractYoutubeId(url) {
     if (!url) return '';
     
-    // 如果長度為 11 且不包含網址特殊字元，可能已經是 ID
-    if (url.length === 11 && !url.includes('/') && !url.includes('.')) {
-        return url;
+    const trimmed = url.trim();
+    
+    // 如果長度為 11 且不包含網址特殊字元，可能已經是 Video ID
+    if (trimmed.length === 11 && !trimmed.includes('/') && !trimmed.includes('.')) {
+        return trimmed;
     }
     
+    // 如果長度為 24 且以 UC 開頭，可能已經是 Channel ID
+    if (trimmed.length === 24 && trimmed.startsWith('UC') && !trimmed.includes('/') && !trimmed.includes('.')) {
+        return trimmed;
+    }
+    
+    // 檢查 Channel ID 網址 (包含 /channel/UC.../live 或 /channel/UC...)
+    const channelMatch = trimmed.match(/(?:youtube\.com\/channel\/)(UC[a-zA-Z0-9_-]{22})(?:\/live)?/);
+    if (channelMatch && channelMatch[1]) {
+        return channelMatch[1];
+    }
+    
+    // 檢查一般影片 ID 網址 (11 位)
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-    const match = url.match(regExp);
+    const match = trimmed.match(regExp);
     return (match && match[2].length === 11) ? match[2] : '';
 }
 
@@ -632,13 +648,13 @@ function addCustomChannel(name, type, urlVal) {
     let desc = '';
     
     if (type === 'youtube') {
-        const videoId = extractYoutubeId(resolvedValue);
-        if (!videoId) {
-            alert('無法解析 YouTube 影片 ID，請輸入正確的 YouTube 直播網址或 11 位元 ID！');
+        const youtubeId = extractYoutubeId(resolvedValue);
+        if (!youtubeId) {
+            alert('無法解析 YouTube 影片或頻道 ID！請輸入正確的直播/影片網址 (例如包含 /channel/UC.../live) 或 11/24 字元 ID。');
             return;
         }
-        resolvedValue = videoId;
-        desc = '自訂 YouTube 頻道 (僅聽音訊)';
+        resolvedValue = youtubeId;
+        desc = youtubeId.startsWith('UC') ? '自訂 YouTube 頻道直播 (僅聽音訊)' : '自訂 YouTube 影片 (僅聽音訊)';
     } else {
         // 音訊串流
         if (!resolvedValue.startsWith('http://') && !resolvedValue.startsWith('https://')) {
