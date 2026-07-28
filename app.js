@@ -58,7 +58,10 @@ const dom = {
     addChannelForm: document.getElementById('add-channel-form'),
     newChannelName: document.getElementById('new-channel-name'),
     newChannelType: document.getElementById('new-channel-type'),
-    newChannelUrl: document.getElementById('new-channel-url')
+    newChannelUrl: document.getElementById('new-channel-url'),
+    exportCustomChannelsBtn: document.getElementById('export-custom-channels-btn'),
+    importCustomChannelsBtn: document.getElementById('import-custom-channels-btn'),
+    customChannelsTransferData: document.getElementById('custom-channels-transfer-data')
 };
 
 /* ==========================================
@@ -137,6 +140,39 @@ function loadCustomChannels() {
 
 function saveCustomChannels() {
     localStorage.setItem('tw_news_custom_channels', JSON.stringify(state.customChannels));
+}
+
+function normalizeImportedChannels(raw) {
+    let parsed;
+
+    try {
+        parsed = JSON.parse(raw);
+    } catch (e) {
+        throw new Error('設定內容不是正確的 JSON 格式。');
+    }
+
+    if (!Array.isArray(parsed)) {
+        throw new Error('設定內容格式不正確，應該是一組頻道清單。');
+    }
+
+    return parsed.map((channel, index) => {
+        const name = typeof channel.name === 'string' ? channel.name.trim() : '';
+        const type = channel.type;
+        const value = typeof channel.value === 'string' ? channel.value.trim() : '';
+        const desc = typeof channel.desc === 'string' ? channel.desc.trim() : '';
+
+        if (!name || !value || !['youtube', 'audio'].includes(type)) {
+            throw new Error(`第 ${index + 1} 筆頻道資料不完整，請確認 name、type、value 欄位。`);
+        }
+
+        return {
+            id: typeof channel.id === 'string' && channel.id.trim() ? channel.id.trim() : `custom-imported-${Date.now()}-${index}`,
+            name,
+            desc: desc || (type === 'youtube' ? '自訂 YouTube 頻道 (僅聽音訊)' : '自訂音訊串流廣播'),
+            type,
+            value
+        };
+    });
 }
 
 /* ==========================================
@@ -651,6 +687,63 @@ function deleteCustomChannel(id) {
     }
 }
 
+async function exportCustomChannels() {
+    const exportData = JSON.stringify(state.customChannels, null, 2);
+    dom.customChannelsTransferData.value = exportData;
+    dom.customChannelsTransferData.focus();
+    dom.customChannelsTransferData.select();
+
+    if (state.customChannels.length === 0) {
+        alert('目前沒有自訂頻道可匯出。');
+        return;
+    }
+
+    try {
+        if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(exportData);
+        } else {
+            document.execCommand('copy');
+        }
+        alert('自訂頻道設定已複製。請在手機或另一台 NB 開啟本 App 後貼上並匯入。');
+    } catch (e) {
+        alert('已產生匯出內容，但瀏覽器不允許自動複製。請手動複製文字框內的內容。');
+    }
+}
+
+function importCustomChannels() {
+    const raw = dom.customChannelsTransferData.value.trim();
+
+    if (!raw) {
+        alert('請先貼上自訂頻道設定內容。');
+        return;
+    }
+
+    let importedChannels;
+    try {
+        importedChannels = normalizeImportedChannels(raw);
+    } catch (e) {
+        alert(e.message);
+        return;
+    }
+
+    const confirmed = confirm(`即將匯入 ${importedChannels.length} 個自訂頻道，並取代目前這台裝置的自訂頻道。是否繼續？`);
+    if (!confirmed) return;
+
+    if (state.currentChannel && state.currentChannel.id.startsWith('custom-')) {
+        stopAllPlayers();
+        dom.playPauseBtn.disabled = true;
+        dom.playerChannelTitle.innerText = '請選擇頻道開始收聽';
+        dom.playerChannelDesc.innerText = '支援電視新聞音訊與廣播電台串流，節省手機螢幕頻寬電力';
+        dom.playerChannelType.innerText = '準備就緒';
+    }
+
+    state.customChannels = importedChannels;
+    saveCustomChannels();
+    renderCustomGrid();
+    switchTab('custom');
+    alert('自訂頻道已匯入完成。');
+}
+
 /* ==========================================
    事件監聽與分頁切換
    ========================================== */
@@ -714,6 +807,9 @@ function setupEventListeners() {
             dom.newChannelUrl.value
         );
     });
+
+    dom.exportCustomChannelsBtn.addEventListener('click', exportCustomChannels);
+    dom.importCustomChannelsBtn.addEventListener('click', importCustomChannels);
 }
 
 // 啟動 App

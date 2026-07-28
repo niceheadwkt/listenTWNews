@@ -135,9 +135,9 @@
                     <!-- Custom Channels -->
                     <div class="tab-pane" id="tab-custom">
                         <div class="custom-management">
-                            <div class="add-channel-box glass-card">
-                                <h3><i data-lucide="plus-circle"></i> 新增自訂頻道</h3>
-                                <form id="add-channel-form">
+                             <div class="add-channel-box glass-card">
+                                 <h3><i data-lucide="plus-circle"></i> 新增自訂頻道</h3>
+                                 <form id="add-channel-form">
                                     <div class="form-group">
                                         <label for="new-channel-name">頻道名稱</label>
                                         <input type="text" id="new-channel-name" placeholder="例如：我的自訂新聞" required>
@@ -158,12 +158,29 @@
                                     </div>
                                     <button type="submit" class="submit-btn">
                                         <i data-lucide="plus"></i> 加入頻道清單
-                                    </button>
-                                </form>
-                            </div>
-                            
-                            <div class="custom-channels-list-wrapper">
-                                <h3>您的自訂頻道</h3>
+                                     </button>
+                                 </form>
+                             </div>
+
+                             <div class="transfer-channel-box glass-card">
+                                 <h3><i data-lucide="copy"></i> 轉移自訂頻道</h3>
+                                 <div class="transfer-actions">
+                                     <button type="button" class="utility-btn" id="export-custom-channels-btn">
+                                         <i data-lucide="clipboard-copy"></i> 匯出並複製
+                                     </button>
+                                     <button type="button" class="utility-btn secondary" id="import-custom-channels-btn">
+                                         <i data-lucide="download"></i> 匯入設定
+                                     </button>
+                                 </div>
+                                 <div class="form-group transfer-input-group">
+                                     <label for="custom-channels-transfer-data">自訂頻道設定內容</label>
+                                     <textarea id="custom-channels-transfer-data" rows="5" placeholder="在這裡貼上從另一台裝置匯出的設定內容"></textarea>
+                                     <small class="form-help">可用於轉移到手機或另一台 NB，匯入後會取代目前這台裝置的自訂頻道。</small>
+                                 </div>
+                             </div>
+                             
+                             <div class="custom-channels-list-wrapper">
+                                 <h3>您的自訂頻道</h3>
                                 <div class="channel-grid" id="custom-channel-list">
                                     <!-- JS Dynamically Populated -->
                                     <div class="empty-state">
