@@ -618,30 +618,112 @@ body {
     gap: 20px;
 }
 
- .add-channel-box {
-     padding: 20px;
- }
- 
- .add-channel-box h3,
- .transfer-channel-box h3 {
-     font-size: 1.1rem;
-     font-weight: 700;
-     margin-bottom: 15px;
-     display: flex;
+/* 自訂頻道頂部工具列 */
+.custom-management-header {
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.custom-header-info h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary-neon);
+    display: flex;
     align-items: center;
     gap: 8px;
-     color: var(--primary-neon);
- }
- 
- .add-channel-box h3 svg,
- .transfer-channel-box h3 svg {
-     width: 18px;
-     height: 18px;
- }
+    margin-bottom: 4px;
+}
 
- .transfer-channel-box {
-     padding: 20px;
- }
+.custom-header-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.custom-action-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.action-toggle-btn {
+    background: rgba(0, 242, 254, 0.12);
+    color: var(--text-primary);
+    border: 1px solid rgba(0, 242, 254, 0.3);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--transition-smooth);
+}
+
+.action-toggle-btn:hover,
+.action-toggle-btn.active {
+    background: rgba(0, 242, 254, 0.25);
+    border-color: var(--primary-neon);
+    box-shadow: 0 0 12px rgba(0, 242, 254, 0.25);
+    color: #fff;
+}
+
+.action-toggle-btn.secondary {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.action-toggle-btn.secondary:hover,
+.action-toggle-btn.secondary.active {
+    background: rgba(79, 172, 254, 0.2);
+    border-color: var(--secondary-neon);
+    color: #fff;
+}
+
+.collapsible-pane {
+    animation: fadeInDown 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.add-channel-box {
+    padding: 20px;
+}
+
+.add-channel-box h3,
+.transfer-channel-box h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--primary-neon);
+}
+
+.add-channel-box h3 svg,
+.transfer-channel-box h3 svg {
+    width: 18px;
+    height: 18px;
+}
+
+.transfer-channel-box {
+    padding: 20px;
+}
 
 .form-group {
     margin-bottom: 12px;

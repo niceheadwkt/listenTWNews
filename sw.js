@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tw-news-reader-v6'; // 升級快取版本至 v6
+const CACHE_NAME = 'tw-news-reader-v10'; // 升級快取版本至 v10
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

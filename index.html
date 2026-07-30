@@ -137,7 +137,24 @@
                     <!-- Custom Channels -->
                     <div class="tab-pane" id="tab-custom">
                         <div class="custom-management">
-                             <div class="add-channel-box glass-card">
+                             <!-- 頂部管理工具列按鈕 -->
+                             <div class="custom-management-header glass-card">
+                                 <div class="custom-header-info">
+                                     <h3><i data-lucide="sliders"></i> 自訂頻道管理</h3>
+                                     <p class="custom-header-desc">建立您的專屬頻道，或備份/復原 JSON 檔案。</p>
+                                 </div>
+                                 <div class="custom-action-buttons">
+                                     <button type="button" class="action-toggle-btn" id="toggle-add-pane-btn">
+                                         <i data-lucide="plus-circle"></i> 新增自訂頻道
+                                     </button>
+                                     <button type="button" class="action-toggle-btn secondary" id="toggle-transfer-pane-btn">
+                                         <i data-lucide="file-json"></i> 匯入 / 匯出 JSON
+                                     </button>
+                                 </div>
+                             </div>
+
+                             <!-- 面板一：新增自訂頻道表單 (預設折疊隱藏) -->
+                             <div class="add-channel-box glass-card collapsible-pane" id="add-channel-pane" style="display: none;">
                                  <h3><i data-lucide="plus-circle"></i> 新增自訂頻道</h3>
                                  <form id="add-channel-form">
                                     <div class="form-group">
@@ -164,30 +181,36 @@
                                  </form>
                              </div>
 
-                             <div class="transfer-channel-box glass-card">
-                                 <h3><i data-lucide="copy"></i> 轉移自訂頻道</h3>
+                             <!-- 面板二：匯入 / 匯出 JSON 檔案 (預設折疊隱藏) -->
+                             <div class="transfer-channel-box glass-card collapsible-pane" id="transfer-channel-pane" style="display: none;">
+                                 <h3><i data-lucide="file-json"></i> 匯入與匯出 JSON 頻道資料</h3>
+                                 <p class="form-help" style="margin-bottom: 12px;">支援選取 .json 備份檔案，或直接貼上 JSON 設定內容進行匯入。</p>
                                  <div class="transfer-actions">
-                                     <button type="button" class="utility-btn" id="export-custom-channels-btn">
-                                         <i data-lucide="clipboard-copy"></i> 匯出並複製
+                                     <button type="button" class="utility-btn" id="export-json-file-btn">
+                                         <i data-lucide="download"></i> 匯出 JSON 檔案
                                      </button>
-                                     <button type="button" class="utility-btn secondary" id="import-custom-channels-btn">
-                                         <i data-lucide="download"></i> 匯入設定
+                                     <button type="button" class="utility-btn secondary" id="import-json-trigger-btn">
+                                         <i data-lucide="upload"></i> 選擇 JSON 檔案匯入
                                      </button>
+                                     <input type="file" id="import-json-file-input" accept=".json,application/json" style="display: none;">
                                  </div>
-                                 <div class="form-group transfer-input-group">
-                                     <label for="custom-channels-transfer-data">自訂頻道設定內容</label>
-                                     <textarea id="custom-channels-transfer-data" rows="5" placeholder="在這裡貼上從另一台裝置匯出的設定內容"></textarea>
-                                     <small class="form-help">可用於轉移到手機或另一台 NB，匯入後會取代目前這台裝置的自訂頻道。</small>
+                                 <div class="form-group transfer-input-group" style="margin-top: 15px;">
+                                     <label for="custom-channels-text-input">或直接貼上 JSON 內容匯入：</label>
+                                     <textarea id="custom-channels-text-input" rows="3" placeholder='格式如：[{"name": "TVBS NEWS", "type": "youtube", "value": "m_dhMSvUCIc"}]'></textarea>
+                                     <button type="button" class="utility-btn secondary" id="import-text-btn" style="margin-top: 8px; width: 100%;">
+                                         <i data-lucide="file-text"></i> 匯入貼上內容
+                                     </button>
                                  </div>
                              </div>
                              
+                             <!-- 優先展示：您的自訂頻道 -->
                              <div class="custom-channels-list-wrapper">
                                  <h3>您的自訂頻道</h3>
                                 <div class="channel-grid" id="custom-channel-list">
                                     <!-- JS Dynamically Populated -->
                                     <div class="empty-state">
                                         <i data-lucide="heart"></i>
-                                        <p>目前沒有自訂頻道，請在上方新增！</p>
+                                        <p>目前沒有自訂頻道，請點選上方【新增自訂頻道】建立！</p>
                                     </div>
                                 </div>
                             </div>
@@ -201,7 +224,7 @@
     <!-- YouTube Iframe API -->
     <script src="https://www.youtube.com/iframe_api"></script>
     <!-- Core Application Logic -->
-    <script src="app.js"></script>
+    <script src="app.js?v=10"></script>
 
     <!-- Register PWA Service Worker -->
     <script>

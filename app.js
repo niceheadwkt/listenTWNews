@@ -5,13 +5,13 @@
 const DEFAULT_TV_CHANNELS = [
     { id: 'tv-ftv', name: '民視新聞台', desc: 'Formosa TV News 24小時線上直播 (訊號正常發聲)', type: 'youtube', value: 'ylYJSBUgaMA', channelId: 'UC2VmWn8dAqkzlQqvy02E1PA' },
     { id: 'tv-ebc57', name: '東森財經新聞台 (57台)', desc: 'EBC 57台 24小時線上直播 (東森電視官方線上直播訊號)', type: 'youtube', value: 'AEBeWMM1atA', channelId: 'UC5money57' },
-    { id: 'tv-ttv', name: '台視新聞台', desc: 'TTV News 資訊台 24小時直播 (訊號正常發聲)', type: 'youtube', value: 'xL0ch83RAK8', channelId: 'UC8ROUUjHzEQm-ndb69CX8Ww' },
+    { id: 'tv-ttv', name: '台視新聞台', desc: 'TTV News 資訊台 24小時直播 (訊號正常發聲)', type: 'youtube', value: '9iRAqBMakXY', fallback: 'MaTO_CAzqJA', channelId: 'UC8ROUUjHzEQm-ndb69CX8Ww' },
     { id: 'tv-ctv', name: '中視新聞台', desc: 'CTV News 資訊台 24小時直播 (訊號正常發聲)', type: 'youtube', value: 'TCnaIE_SAtM', channelId: 'UCmH4q-YjeazayYCVHHkGAMA' },
-    { id: 'tv-cts', name: '華視新聞台 (52台)', desc: 'CTS News CH52 資訊台 24小時直播 (訊號正常發聲)', type: 'youtube', value: 'y6120QOlsfU', channelId: 'UCDCJyLpbfgeVE9iZiEam-Kg' },
-    { id: 'tv-pts', name: '公視新聞台', desc: 'PTS News 24小時線上直播 (訊號正常發聲)', type: 'youtube', value: 'quwq87002ls', channelId: 'UCexpzYDEnfmAvPSfG4xbcjA' },
-    { id: 'tv-cti', name: '中天新聞台', desc: 'CTI News 24小時線上直播 (訊號正常發聲)', type: 'youtube', value: 'wUPPkSANpyo', channelId: 'UCpu3bemTQwAU8PqM4kJdoEQ' },
+    { id: 'tv-cts', name: '華視新聞台 (52台)', desc: 'CTS News CH52 資訊台 24小時直播 (訊號正常發聲)', type: 'youtube', value: 'wM0g8EoUZ_E', channelId: 'UCDCJyLpbfgeVE9iZiEam-Kg' },
+    { id: 'tv-pts', name: '公視新聞台', desc: 'PTS News 24小時線上直播 (訊號正常發聲)', type: 'youtube', value: 'quwqlazU-c8', channelId: 'UCexpzYDEnfmAvPSfG4xbcjA' },
+    { id: 'tv-cti', name: '中天新聞台', desc: 'CTI News 24小時線上直播 (訊號正常發聲)', type: 'youtube', value: 'vr3XyVCR4T0', channelId: 'UCpu3bemTQwAU8PqM4kJdoEQ' },
     { id: 'tv-set', name: '三立新聞台', desc: 'SET News 24小時線上直播 (訊號正常發聲)', type: 'youtube', value: 'yeYC0mbSIOo', channelId: 'UC2TuODJhC03pLgd6MpWP0iw' },
-    { id: 'tv-tvbs', name: 'TVBS 新聞台', desc: 'TVBS News 55頻道 24小時直播 (訊號正常發聲)', type: 'youtube', value: 'ylYJSBUgaMA', channelId: 'UC5nwNW4KdC0SzrhF9BXEYOQ' }
+    { id: 'tv-tvbs', name: 'TVBS 新聞台', desc: 'TVBS News 55頻道 24小時直播 (訊號正常發聲)', type: 'youtube', value: 'm_dhMSvUCIc', channelId: 'UC5nwNW4KdC0SzrhF9BXEYOQ' }
 ];
 
 // 預設廣播新聞頻道 (音訊串流)
@@ -55,14 +55,20 @@ const dom = {
     radioChannelList: document.getElementById('radio-channel-list'),
     customChannelList: document.getElementById('custom-channel-list'),
     
-    // 表單
+    // 表單與自訂管理
     addChannelForm: document.getElementById('add-channel-form'),
     newChannelName: document.getElementById('new-channel-name'),
     newChannelType: document.getElementById('new-channel-type'),
     newChannelUrl: document.getElementById('new-channel-url'),
-    exportCustomChannelsBtn: document.getElementById('export-custom-channels-btn'),
-    importCustomChannelsBtn: document.getElementById('import-custom-channels-btn'),
-    customChannelsTransferData: document.getElementById('custom-channels-transfer-data')
+    toggleAddPaneBtn: document.getElementById('toggle-add-pane-btn'),
+    toggleTransferPaneBtn: document.getElementById('toggle-transfer-pane-btn'),
+    addChannelPane: document.getElementById('add-channel-pane'),
+    transferChannelPane: document.getElementById('transfer-channel-pane'),
+    exportJsonFileBtn: document.getElementById('export-json-file-btn'),
+    importJsonTriggerBtn: document.getElementById('import-json-trigger-btn'),
+    importJsonFileInput: document.getElementById('import-json-file-input'),
+    customChannelsTextInput: document.getElementById('custom-channels-text-input'),
+    importTextBtn: document.getElementById('import-text-btn')
 };
 
 /* ==========================================
@@ -152,23 +158,68 @@ function normalizeImportedChannels(raw) {
     let parsed;
 
     try {
-        parsed = JSON.parse(raw);
+        parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
     } catch (e) {
-        throw new Error('設定內容不是正確的 JSON 格式。');
+        throw new Error('檔案內容並非合法的 JSON 格式，請檢查檔案內容。');
     }
 
-    if (!Array.isArray(parsed)) {
-        throw new Error('設定內容格式不正確，應該是一組頻道清單。');
+    // 相容多種 JSON 結構：陣列、{ customChannels: [] }, { channels: [] }, { items: [] }, 或單一物件
+    let channelArray = [];
+    if (Array.isArray(parsed)) {
+        channelArray = parsed;
+    } else if (parsed && typeof parsed === 'object') {
+        if (Array.isArray(parsed.customChannels)) {
+            channelArray = parsed.customChannels;
+        } else if (Array.isArray(parsed.channels)) {
+            channelArray = parsed.channels;
+        } else if (Array.isArray(parsed.items)) {
+            channelArray = parsed.items;
+        } else if ((parsed.name || parsed.title) && (parsed.value || parsed.url || parsed.link)) {
+            channelArray = [parsed];
+        } else {
+            throw new Error('JSON 格式中未找到有效的頻道資料清單。');
+        }
+    } else {
+        throw new Error('設定內容格式不正確，應該為 JSON 頻道資料清單。');
     }
 
-    return parsed.map((channel, index) => {
-        const name = typeof channel.name === 'string' ? channel.name.trim() : '';
-        const type = channel.type;
-        const value = typeof channel.value === 'string' ? channel.value.trim() : '';
+    if (channelArray.length === 0) {
+        throw new Error('JSON 檔案中沒有找到任何自訂頻道資料。');
+    }
+
+    return channelArray.map((channel, index) => {
+        const name = typeof channel.name === 'string' && channel.name.trim() 
+            ? channel.name.trim() 
+            : (typeof channel.title === 'string' && channel.title.trim() ? channel.title.trim() : `自訂頻道 ${index + 1}`);
+        
+        let type = channel.type;
+        let rawVal = typeof channel.value === 'string' && channel.value.trim() 
+            ? channel.value.trim() 
+            : (typeof channel.url === 'string' && channel.url.trim() 
+                ? channel.url.trim() 
+                : (typeof channel.link === 'string' ? channel.link.trim() : ''));
+
         const desc = typeof channel.desc === 'string' ? channel.desc.trim() : '';
 
-        if (!name || !value || !['youtube', 'audio'].includes(type)) {
-            throw new Error(`第 ${index + 1} 筆頻道資料不完整，請確認 name、type、value 欄位。`);
+        // 類型自動判定
+        if (!['youtube', 'audio'].includes(type)) {
+            if (rawVal.includes('youtube.com') || rawVal.includes('youtu.be') || (rawVal.length === 11 && !rawVal.includes('.'))) {
+                type = 'youtube';
+            } else {
+                type = 'audio';
+            }
+        }
+
+        // 如果是 YouTube 類型，嘗試自動提煉影片/頻道 ID
+        if (type === 'youtube') {
+            const extractedId = extractYoutubeId(rawVal);
+            if (extractedId) {
+                rawVal = extractedId;
+            }
+        }
+
+        if (!name || !rawVal) {
+            throw new Error(`第 ${index + 1} 筆頻道資料不完整 (缺乏頻道名稱或網址/ID)。`);
         }
 
         return {
@@ -176,7 +227,7 @@ function normalizeImportedChannels(raw) {
             name,
             desc: desc || (type === 'youtube' ? '自訂 YouTube 頻道 (僅聽音訊)' : '自訂音訊串流廣播'),
             type,
-            value
+            value: rawVal
         };
     });
 }
@@ -321,7 +372,12 @@ function playChannel(channel) {
     
     // 更新當前頻道文字資訊
     dom.playerChannelTitle.innerText = channel.name;
-    dom.playerChannelDesc.innerText = channel.desc || (channel.type === 'youtube' ? 'YouTube 影片/直播' : '廣播電台/串流音訊');
+    const baseDesc = channel.desc || (channel.type === 'youtube' ? 'YouTube 影片/直播' : '廣播電台/串流音訊');
+    if (channel.type === 'youtube') {
+        dom.playerChannelDesc.innerHTML = `${escapeHtml(baseDesc)} · <a href="https://www.youtube.com/watch?v=${channel.value}" target="_blank" rel="noopener noreferrer" style="color: var(--primary-neon); text-decoration: underline;">開啟 YouTube 直播頁</a>`;
+    } else {
+        dom.playerChannelDesc.innerText = baseDesc;
+    }
     dom.playerChannelType.innerText = channel.type === 'youtube' ? '電視直播 (僅聽音訊)' : '廣播電台';
     
     // 啟動音波動畫
@@ -517,7 +573,7 @@ function createYoutubePlayer(videoId) {
                 },
                 onError: async (event) => {
                     console.warn("YouTube 播放器發生錯誤 (Error Code: " + event.data + ")");
-                    // 當影片過期(100/2)或嵌入受限(101/150)時，自動對 channelId 發起最新 /live 直播 ID 自癒檢索
+                    // 當影片過期(100/2)或嵌入受限(101/150/153)時，自動對 channelId 發起最新 /live 直播 ID 自癒檢索
                     if (state.currentChannel && state.currentChannel.channelId) {
                         console.log(`[${state.currentChannel.name}] 直播 ID 可能失效，啟動動態自癒檢索...`);
                         const freshVideoId = await resolveLiveVideoId(state.currentChannel.channelId);
@@ -529,6 +585,13 @@ function createYoutubePlayer(videoId) {
                     }
                     if (state.currentChannel && state.currentChannel.fallback) {
                         playYoutubeVideo(state.currentChannel.fallback);
+                        return;
+                    }
+                    // 若為嵌入限制錯誤 (101、150、153)，直接在新分頁開啟 YouTube 直播頁面
+                    if ([101, 150, 153].includes(event.data)) {
+                        const externalUrl = `https://www.youtube.com/watch?v=${videoId}`;
+                        console.warn("嵌入受限，於新分頁開啟 YouTube ", externalUrl);
+                        window.open(externalUrl, "_blank");
                     }
                 },
                 onStateChange: (event) => {
@@ -562,6 +625,19 @@ function createYoutubePlayer(videoId) {
 function handleYoutubePlayerStateChange(playerState) {
     if (playerState === YT.PlayerState.PLAYING) {
         state.isPlaying = true;
+        
+        // 確保播放時強迫解開靜音並同步設定音量
+        if (state.youtubePlayer) {
+            try {
+                if (typeof state.youtubePlayer.unMute === 'function') {
+                    state.youtubePlayer.unMute();
+                }
+                if (typeof state.youtubePlayer.setVolume === 'function') {
+                    state.youtubePlayer.setVolume(state.volume);
+                }
+            } catch (e) {}
+        }
+
         dom.playPauseBtn.innerHTML = '<i data-lucide="pause"></i>';
         dom.audioVisualizer.classList.add('playing');
         dom.visualizerStatusText.innerText = '電視直播音訊播放中...';
@@ -743,8 +819,14 @@ function addCustomChannel(name, type, urlVal) {
     saveCustomChannels();
     renderCustomGrid();
     
-    // 重設表單
+    // 重設表單並收起面板
     dom.addChannelForm.reset();
+    if (dom.addChannelPane) {
+        dom.addChannelPane.style.display = 'none';
+    }
+    if (dom.toggleAddPaneBtn) {
+        dom.toggleAddPaneBtn.classList.remove('active');
+    }
     
     // 自動切換到自訂頻道分頁，方便觀看新增結果
     switchTab('custom');
@@ -770,61 +852,117 @@ function deleteCustomChannel(id) {
     }
 }
 
-async function exportCustomChannels() {
-    const exportData = JSON.stringify(state.customChannels, null, 2);
-    dom.customChannelsTransferData.value = exportData;
-    dom.customChannelsTransferData.focus();
-    dom.customChannelsTransferData.select();
+// 折疊面板切換 (新增面板 / 轉移面板)
+function toggleCustomPane(paneType) {
+    if (!dom.addChannelPane || !dom.transferChannelPane) return;
 
-    if (state.customChannels.length === 0) {
-        alert('目前沒有自訂頻道可匯出。');
-        return;
+    if (paneType === 'add') {
+        const isHidden = dom.addChannelPane.style.display === 'none';
+        dom.addChannelPane.style.display = isHidden ? 'block' : 'none';
+        dom.transferChannelPane.style.display = 'none';
+        
+        dom.toggleAddPaneBtn.classList.toggle('active', isHidden);
+        dom.toggleTransferPaneBtn.classList.remove('active');
+    } else if (paneType === 'transfer') {
+        const isHidden = dom.transferChannelPane.style.display === 'none';
+        dom.transferChannelPane.style.display = isHidden ? 'block' : 'none';
+        dom.addChannelPane.style.display = 'none';
+        
+        dom.toggleTransferPaneBtn.classList.toggle('active', isHidden);
+        dom.toggleAddPaneBtn.classList.remove('active');
     }
-
-    try {
-        if (navigator.clipboard && window.isSecureContext) {
-            await navigator.clipboard.writeText(exportData);
-        } else {
-            document.execCommand('copy');
-        }
-        alert('自訂頻道設定已複製。請在手機或另一台 NB 開啟本 App 後貼上並匯入。');
-    } catch (e) {
-        alert('已產生匯出內容，但瀏覽器不允許自動複製。請手動複製文字框內的內容。');
-    }
+    initLucideIcons();
 }
 
-function importCustomChannels() {
-    const raw = dom.customChannelsTransferData.value.trim();
-
-    if (!raw) {
-        alert('請先貼上自訂頻道設定內容。');
+// 匯出自訂頻道 JSON 檔案
+function exportCustomChannelsJson() {
+    if (state.customChannels.length === 0) {
+        alert('目前沒有自訂頻道可供匯出。');
         return;
     }
 
-    let importedChannels;
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state.customChannels, null, 2));
+    const downloadAnchor = document.createElement('a');
+    const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `tw_news_custom_channels_${dateStr}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+}
+
+// 讀取 JSON 檔案並匯入頻道
+function importCustomChannelsJson(file) {
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const rawContent = e.target.result;
+            const importedChannels = normalizeImportedChannels(rawContent);
+
+            const confirmed = confirm(`即將匯入 ${importedChannels.length} 個自訂頻道，將覆蓋目前裝置上的自訂頻道清單。是否繼續？`);
+            if (!confirmed) return;
+
+            if (state.currentChannel && state.currentChannel.id.startsWith('custom-')) {
+                stopAllPlayers();
+                dom.playPauseBtn.disabled = true;
+                dom.playerChannelTitle.innerText = '請選擇頻道開始收聽';
+                dom.playerChannelDesc.innerText = '支援電視新聞音訊與廣播電台串流，節省手機螢幕頻寬電力';
+                dom.playerChannelType.innerText = '準備就緒';
+            }
+
+            state.customChannels = importedChannels;
+            saveCustomChannels();
+            renderCustomGrid();
+            
+            // 收起轉移面板
+            dom.transferChannelPane.style.display = 'none';
+            dom.toggleTransferPaneBtn.classList.remove('active');
+            
+            alert('自訂頻道已成功由 JSON 檔案讀取匯入！');
+        } catch (err) {
+            alert(`JSON 檔案讀取失敗：${err.message}`);
+        }
+    };
+    reader.readAsText(file);
+}
+
+// 讀取貼上的 JSON 文字內容並匯入頻道
+function importCustomChannelsText() {
+    if (!dom.customChannelsTextInput) return;
+    const rawContent = dom.customChannelsTextInput.value.trim();
+    if (!rawContent) {
+        alert('請先在文字框貼上 JSON 設定內容！');
+        return;
+    }
+
     try {
-        importedChannels = normalizeImportedChannels(raw);
-    } catch (e) {
-        alert(e.message);
-        return;
+        const importedChannels = normalizeImportedChannels(rawContent);
+        const confirmed = confirm(`即將匯入 ${importedChannels.length} 個自訂頻道，將覆蓋目前裝置上的自訂頻道清單。是否繼續？`);
+        if (!confirmed) return;
+
+        if (state.currentChannel && state.currentChannel.id.startsWith('custom-')) {
+            stopAllPlayers();
+            dom.playPauseBtn.disabled = true;
+            dom.playerChannelTitle.innerText = '請選擇頻道開始收聽';
+            dom.playerChannelDesc.innerText = '支援電視新聞音訊與廣播電台串流，節省手機螢幕頻寬電力';
+            dom.playerChannelType.innerText = '準備就緒';
+        }
+
+        state.customChannels = importedChannels;
+        saveCustomChannels();
+        renderCustomGrid();
+        
+        // 清空輸入並收起轉移面板
+        dom.customChannelsTextInput.value = '';
+        dom.transferChannelPane.style.display = 'none';
+        dom.toggleTransferPaneBtn.classList.remove('active');
+        
+        alert(`成功匯入 ${importedChannels.length} 個自訂頻道！`);
+    } catch (err) {
+        alert(`JSON 內容解析失敗：${err.message}`);
     }
-
-    const confirmed = confirm(`即將匯入 ${importedChannels.length} 個自訂頻道，並取代目前這台裝置的自訂頻道。是否繼續？`);
-    if (!confirmed) return;
-
-    if (state.currentChannel && state.currentChannel.id.startsWith('custom-')) {
-        stopAllPlayers();
-        dom.playPauseBtn.disabled = true;
-        dom.playerChannelTitle.innerText = '請選擇頻道開始收聽';
-        dom.playerChannelDesc.innerText = '支援電視新聞音訊與廣播電台串流，節省手機螢幕頻寬電力';
-        dom.playerChannelType.innerText = '準備就緒';
-    }
-
-    state.customChannels = importedChannels;
-    saveCustomChannels();
-    renderCustomGrid();
-    switchTab('custom');
-    alert('自訂頻道已匯入完成。');
 }
 
 /* ==========================================
@@ -891,8 +1029,34 @@ function setupEventListeners() {
         );
     });
 
-    dom.exportCustomChannelsBtn.addEventListener('click', exportCustomChannels);
-    dom.importCustomChannelsBtn.addEventListener('click', importCustomChannels);
+    // 自訂頻道折疊面板切換按鈕
+    if (dom.toggleAddPaneBtn) {
+        dom.toggleAddPaneBtn.addEventListener('click', () => toggleCustomPane('add'));
+    }
+    if (dom.toggleTransferPaneBtn) {
+        dom.toggleTransferPaneBtn.addEventListener('click', () => toggleCustomPane('transfer'));
+    }
+
+    // JSON 檔案匯出與匯入
+    if (dom.exportJsonFileBtn) {
+        dom.exportJsonFileBtn.addEventListener('click', exportCustomChannelsJson);
+    }
+    if (dom.importJsonTriggerBtn && dom.importJsonFileInput) {
+        dom.importJsonTriggerBtn.addEventListener('click', () => {
+            dom.importJsonFileInput.value = '';
+            dom.importJsonFileInput.click();
+        });
+        dom.importJsonFileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                importCustomChannelsJson(e.target.files[0]);
+            }
+        });
+    }
+
+    // 文字貼上匯入
+    if (dom.importTextBtn) {
+        dom.importTextBtn.addEventListener('click', importCustomChannelsText);
+    }
 }
 
 // 啟動 App
