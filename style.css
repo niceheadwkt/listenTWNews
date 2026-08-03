@@ -506,6 +506,7 @@ body {
     transition: var(--transition-smooth);
     position: relative;
     overflow: hidden;
+    flex-shrink: 0;
 }
 
 .channel-card:hover {
