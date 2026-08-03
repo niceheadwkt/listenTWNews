@@ -36,6 +36,8 @@
 - [x] 透過 AI 瀏覽器子代理深度除錯台視新聞台無聲問題，實測確定為台視官方設定第三方網站嵌入限制 (Error 153)，並於 UI 提供一鍵直連播放按鈕 (`app.js`)
 - [x] 啟動與瀏覽器實測驗證完成
 - [x] 盤點並整合專案開發過程之 6 大核心雷區（包含 YouTube 嵌入限制、自動播放政策、單例重構、跨域代理、JSON 容錯與 PWA 快取）至 Obsidian 的 [AI/listenTWNews_工作筆記.md](file:///c:/Users/ch26788/我的雲端硬碟/Obsidian/AI/listenTWNews_工作筆記.md) 筆記中。
+- [x] 新增預設廣播電台頻道：中廣新聞網、飛碟聯播網與 KISSRadio 聯播網 (`app.js`)
+- [x] 修正東森新聞台 (51台) 的預設 YouTube Video ID 與正確的 Channel ID (`app.js`)
 
 
 ## 關鍵設計決策

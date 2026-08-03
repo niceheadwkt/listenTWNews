@@ -1,45 +1,10 @@
 [
   {
-    "id": "custom-1785207410568",
-    "name": "TVBS NEWS",
+    "id": "custom-1785207410000",
+    "name": "民視新聞台",
     "desc": "自訂 YouTube 頻道 (僅聽音訊)",
     "type": "youtube",
-    "value": "m_dhMSvUCIc"
-  },
-  {
-    "id": "custom-1785207516770",
-    "name": "台視新聞台",
-    "desc": "自訂 YouTube 頻道 (僅聽音訊)",
-    "type": "youtube",
-    "value": "9iRAqBMakXY"
-  },
-  {
-    "id": "custom-1785207623000",
-    "name": "華視新聞",
-    "desc": "自訂 YouTube 頻道 (僅聽音訊)",
-    "type": "youtube",
-    "value": "wM0g8EoUZ_E"
-  },
-  {
-    "id": "custom-1785207729000",
-    "name": "公共電視",
-    "desc": "自訂 YouTube 頻道 (僅聽音訊)",
-    "type": "youtube",
-    "value": "quwqlazU-c8"
-  },
-  {
-    "id": "custom-1785207835000",
-    "name": "三立財經",
-    "desc": "自訂 YouTube 頻道 (僅聽音訊)",
-    "type": "youtube",
-    "value": "pF507BLtbqU"
-  },
-  {
-    "id": "custom-1785207941000",
-    "name": "三立新聞",
-    "desc": "自訂 YouTube 頻道 (僅聽音訊)",
-    "type": "youtube",
-    "value": "kof-ggVEG3U"
+    "value": "ylYJSBUgaMA"
   },
   {
     "id": "custom-1785208047000",
@@ -56,11 +21,11 @@
     "value": "1I2iq41Akmo"
   },
   {
-    "id": "custom-1785208259000",
-    "name": "中天新聞",
+    "id": "custom-1785207516770",
+    "name": "台視新聞台",
     "desc": "自訂 YouTube 頻道 (僅聽音訊)",
     "type": "youtube",
-    "value": "vr3XyVCR4T0"
+    "value": "9iRAqBMakXY"
   },
   {
     "id": "custom-1785208365000",
@@ -68,5 +33,47 @@
     "desc": "自訂 YouTube 頻道 (僅聽音訊)",
     "type": "youtube",
     "value": "TCnaIE_SAtM"
+  },
+  {
+    "id": "custom-1785207623000",
+    "name": "華視新聞",
+    "desc": "自訂 YouTube 頻道 (僅聽音訊)",
+    "type": "youtube",
+    "value": "wM0g8EoUZ_E"
+  },
+  {
+    "id": "custom-1785207729000",
+    "name": "公共電視",
+    "desc": "自訂 YouTube 頻道 (僅聽音訊)",
+    "type": "youtube",
+    "value": "quwqlazU-c8"
+  },
+  {
+    "id": "custom-1785208259000",
+    "name": "中天新聞",
+    "desc": "自訂 YouTube 頻道 (僅聽音訊)",
+    "type": "youtube",
+    "value": "vr3XyVCR4T0"
+  },
+  {
+    "id": "custom-1785207835000",
+    "name": "三立財經",
+    "desc": "自訂 YouTube 頻道 (僅聽音訊)",
+    "type": "youtube",
+    "value": "pF507BLtbqU"
+  },
+  {
+    "id": "custom-1785207941000",
+    "name": "三立新聞",
+    "desc": "自訂 YouTube 頻道 (僅聽音訊)",
+    "type": "youtube",
+    "value": "kof-ggVEG3U"
+  },
+  {
+    "id": "custom-1785207410568",
+    "name": "TVBS NEWS",
+    "desc": "自訂 YouTube 頻道 (僅聽音訊)",
+    "type": "youtube",
+    "value": "m_dhMSvUCIc"
   }
 ]

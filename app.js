@@ -4,7 +4,7 @@
 
 const DEFAULT_TV_CHANNELS = [
     { id: 'tv-ftv', name: '民視新聞台', desc: 'Formosa TV News 24小時線上直播 (訊號正常發聲)', type: 'youtube', value: 'ylYJSBUgaMA', channelId: 'UC2VmWn8dAqkzlQqvy02E1PA' },
-    { id: 'tv-ebc', name: '東森新聞台 (51台)', desc: 'EBC 51台 24小時線上直播 (東森電視官方線上直播訊號)', type: 'youtube', value: '2mCSYvfqP94', channelId: 'UCF4tYk-YfNn5w5l-7_03L7Q' },
+    { id: 'tv-ebc', name: '東森新聞台 (51台)', desc: 'EBC 51台 24小時線上直播 (東森電視官方線上直播訊號)', type: 'youtube', value: 'V1p33hqPrUk', channelId: 'UCR3asjvr_WAaxwJYEDV_Bfw' },
     { id: 'tv-ebc57', name: '東森財經新聞台 (57台)', desc: 'EBC 57台 24小時線上直播 (東森電視官方線上直播訊號)', type: 'youtube', value: '1I2iq41Akmo', channelId: 'UCwJz31276_q2H78S8mH757w' },
     { id: 'tv-ttv', name: '台視新聞台', desc: 'TTV News 資訊台 24小時直播 (訊號正常發聲)', type: 'youtube', value: '9iRAqBMakXY', fallback: 'MaTO_CAzqJA', channelId: 'UC8ROUUjHzEQm-ndb69CX8Ww' },
     { id: 'tv-ctv', name: '中視新聞台', desc: 'CTV News 資訊台 24小時直播 (訊號正常發聲)', type: 'youtube', value: 'TCnaIE_SAtM', channelId: 'UCmH4q-YjeazayYCVHHkGAMA' },
@@ -20,7 +20,10 @@ const DEFAULT_TV_CHANNELS = [
 const DEFAULT_RADIO_CHANNELS = [
     { id: 'radio-icrt', name: 'ICRT 英文電台', desc: '台北國際社區廣播電台 英語新聞與流行樂', type: 'audio', value: 'https://stream.rcs.revma.com/nkdfurztxp3vv' },
     { id: 'radio-taipei', name: '台北廣播電台', desc: 'FM 93.1 台北市政、即時新聞與生活資訊 (HLS 串流)', type: 'audio', value: 'https://stream.ginnet.cloud/live0130lo-yfyo/_definst_/fm/playlist.m3u8' },
-    { id: 'radio-goodnews', name: '佳音廣播電台', desc: 'FM 90.9 溫馨心靈音樂、生活資訊與經典民歌 (HLS 串流)', type: 'audio', value: 'https://stream.ginnet.cloud/live0119lo-p4rb/_definst_/fm909/playlist.m3u8' }
+    { id: 'radio-goodnews', name: '佳音廣播電台', desc: 'FM 90.9 溫馨心靈音樂、生活資訊與經典民歌 (HLS 串流)', type: 'audio', value: 'https://stream.ginnet.cloud/live0119lo-p4rb/_definst_/fm909/playlist.m3u8' },
+    { id: 'radio-bcc-news', name: '中廣新聞網', desc: '即時新聞、時事評論與生活資訊節目 (BCC News)', type: 'audio', value: 'https://stream.rcs.revma.com/78fm9wyy2tzuv' },
+    { id: 'radio-ufo', name: '飛碟聯播網', desc: 'FM 92.1 飛碟電台，全天候流行音樂與新聞談話節目', type: 'audio', value: 'https://stream.rcs.revma.com/em90w4aeewzuv.m4a' },
+    { id: 'radio-kiss', name: 'KISSRadio 聯播網', desc: 'FM 99.9 大眾廣播電台，當代流行音樂與娛樂資訊 (動態解析)', type: 'audio', value: 'https://kissradiow-hichannel.cdn.hinet.net/live/RA000040/playlist.m3u8' }
 ];
 
 // 應用程式狀態
@@ -393,6 +396,8 @@ function playChannel(channel) {
     const baseDesc = channel.desc || (channel.type === 'youtube' ? 'YouTube 影片/直播' : '廣播電台/串流音訊');
     if (channel.type === 'youtube') {
         dom.playerChannelDesc.innerHTML = `${escapeHtml(baseDesc)} · <a href="https://www.youtube.com/watch?v=${channel.value}" target="_blank" rel="noopener noreferrer" style="color: var(--primary-neon); text-decoration: underline;">開啟 YouTube 直播頁</a>`;
+    } else if (channel.id === 'radio-kiss') {
+        dom.playerChannelDesc.innerHTML = `${escapeHtml(baseDesc)} · <a href="http://www.kiss.com.tw/radio_hq.php?radio_id=156" target="_blank" rel="noopener noreferrer" style="color: var(--primary-neon); text-decoration: underline;">開啟官網播放頁</a>`;
     } else {
         dom.playerChannelDesc.innerText = baseDesc;
     }
@@ -407,8 +412,19 @@ function playChannel(channel) {
         playYoutubeVideo(channel.value);
     } else {
         // 廣播新聞 (Audio 串流) 模式
-        dom.visualizerStatusText.innerText = '廣播電台播放中...';
-        playAudioStream(channel.value);
+        dom.visualizerStatusText.innerText = '廣播電台載入中...';
+        if (channel.id === 'radio-kiss') {
+            resolveKissRadioUrl().then(resolvedUrl => {
+                dom.visualizerStatusText.innerText = '廣播電台播放中...';
+                playAudioStream(resolvedUrl);
+            }).catch(() => {
+                dom.visualizerStatusText.innerText = '廣播電台播放中...';
+                playAudioStream(channel.value);
+            });
+        } else {
+            dom.visualizerStatusText.innerText = '廣播電台播放中...';
+            playAudioStream(channel.value);
+        }
     }
     
     // 更新所有清單的選取狀態
@@ -666,6 +682,35 @@ function handleYoutubePlayerStateChange(playerState) {
         dom.visualizerStatusText.innerText = '已暫停播放';
     }
     initLucideIcons();
+}
+
+// 透過 CORS 代理動態解析 KISSRadio 的當下最新 HLS 播放連結 (含 token)
+async function resolveKissRadioUrl() {
+    const targetUrl = 'http://www.kiss.com.tw/test/hichannel2.php?api=0';
+    const proxies = [
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
+        `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`
+    ];
+    for (const proxyUrl of proxies) {
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2000); // 2秒逾時限制
+            const res = await fetch(proxyUrl, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            if (res.ok) {
+                const text = await res.text();
+                const url = text.trim();
+                if (url.startsWith('http') && url.includes('playlist.m3u8')) {
+                    console.log("成功動態解析 KISSRadio 播放連結:", url);
+                    return url;
+                }
+            }
+        } catch (err) {
+            console.warn("透過代理獲取 KISSRadio 失敗:", err.message);
+        }
+    }
+    // 逾時或失敗時，直接拋出錯誤，讓外層能進入 catch 區塊進行錯誤處理
+    throw new Error("無法解析動態播放連結");
 }
 
 // 播放廣播/音訊串流
