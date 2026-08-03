@@ -4,13 +4,14 @@
 
 const DEFAULT_TV_CHANNELS = [
     { id: 'tv-ftv', name: '民視新聞台', desc: 'Formosa TV News 24小時線上直播 (訊號正常發聲)', type: 'youtube', value: 'ylYJSBUgaMA', channelId: 'UC2VmWn8dAqkzlQqvy02E1PA' },
-    { id: 'tv-ebc57', name: '東森財經新聞台 (57台)', desc: 'EBC 57台 24小時線上直播 (東森電視官方線上直播訊號)', type: 'youtube', value: 'AEBeWMM1atA', channelId: 'UC5money57' },
+    { id: 'tv-ebc57', name: '東森財經新聞台 (57台)', desc: 'EBC 57台 24小時線上直播 (東森電視官方線上直播訊號)', type: 'youtube', value: 'AEBeWMM1atA', channelId: 'UCwJz31276_q2H78S8mH757w' },
     { id: 'tv-ttv', name: '台視新聞台', desc: 'TTV News 資訊台 24小時直播 (訊號正常發聲)', type: 'youtube', value: '9iRAqBMakXY', fallback: 'MaTO_CAzqJA', channelId: 'UC8ROUUjHzEQm-ndb69CX8Ww' },
     { id: 'tv-ctv', name: '中視新聞台', desc: 'CTV News 資訊台 24小時直播 (訊號正常發聲)', type: 'youtube', value: 'TCnaIE_SAtM', channelId: 'UCmH4q-YjeazayYCVHHkGAMA' },
     { id: 'tv-cts', name: '華視新聞台 (52台)', desc: 'CTS News CH52 資訊台 24小時直播 (訊號正常發聲)', type: 'youtube', value: 'wM0g8EoUZ_E', channelId: 'UCDCJyLpbfgeVE9iZiEam-Kg' },
     { id: 'tv-pts', name: '公視新聞台', desc: 'PTS News 24小時線上直播 (訊號正常發聲)', type: 'youtube', value: 'quwqlazU-c8', channelId: 'UCexpzYDEnfmAvPSfG4xbcjA' },
     { id: 'tv-cti', name: '中天新聞台', desc: 'CTI News 24小時線上直播 (訊號正常發聲)', type: 'youtube', value: 'vr3XyVCR4T0', channelId: 'UCpu3bemTQwAU8PqM4kJdoEQ' },
     { id: 'tv-set', name: '三立新聞台', desc: 'SET News 24小時線上直播 (訊號正常發聲)', type: 'youtube', value: 'yeYC0mbSIOo', channelId: 'UC2TuODJhC03pLgd6MpWP0iw' },
+    { id: 'tv-seti', name: '三立財經 iNEWS', desc: '三立財經 iNEWS 24小時線上直播 (訊號正常發聲)', type: 'youtube', value: 'pF507BLtbqU', channelId: 'UCQY7D1s081t_O2x0S-9P0_w' },
     { id: 'tv-tvbs', name: 'TVBS 新聞台', desc: 'TVBS News 55頻道 24小時直播 (訊號正常發聲)', type: 'youtube', value: 'm_dhMSvUCIc', channelId: 'UC5nwNW4KdC0SzrhF9BXEYOQ' }
 ];
 
@@ -75,12 +76,27 @@ const dom = {
    初始化與 YouTube API
    ========================================== */
 
+// 隱藏載入遮罩
+function hideYoutubeLoadingOverlay() {
+    const overlay = document.getElementById('youtube-loading-overlay');
+    if (overlay) {
+        overlay.classList.add('hidden');
+    }
+}
+
 // 初始化應用程式
 function initApp() {
     loadCustomChannels();
     renderChannelLists();
     setupEventListeners();
     initLucideIcons();
+    
+    // 如果 YouTube API 已經提前就緒，直接隱藏遮罩並初始化單例播放器
+    if (window.YT && window.YT.Player) {
+        state.isYoutubeReady = true;
+        initYoutubePlayerSingleton();
+        hideYoutubeLoadingOverlay();
+    }
 }
 
 // 註冊 YouTube Iframe API Ready 全域回呼
@@ -88,6 +104,7 @@ window.onYouTubeIframeAPIReady = function() {
     state.isYoutubeReady = true;
     console.log("YouTube Player API Ready.");
     initYoutubePlayerSingleton();
+    hideYoutubeLoadingOverlay();
 };
 
 // 初始化單例 YouTube 播放器 (用以在使用者點擊時同步加載有聲音的影片，繞過瀏覽器限制)
