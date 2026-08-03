@@ -4,7 +4,8 @@
 
 const DEFAULT_TV_CHANNELS = [
     { id: 'tv-ftv', name: '民視新聞台', desc: 'Formosa TV News 24小時線上直播 (訊號正常發聲)', type: 'youtube', value: 'ylYJSBUgaMA', channelId: 'UC2VmWn8dAqkzlQqvy02E1PA' },
-    { id: 'tv-ebc57', name: '東森財經新聞台 (57台)', desc: 'EBC 57台 24小時線上直播 (東森電視官方線上直播訊號)', type: 'youtube', value: 'AEBeWMM1atA', channelId: 'UCwJz31276_q2H78S8mH757w' },
+    { id: 'tv-ebc', name: '東森新聞台 (51台)', desc: 'EBC 51台 24小時線上直播 (東森電視官方線上直播訊號)', type: 'youtube', value: '2mCSYvfqP94', channelId: 'UCF4tYk-YfNn5w5l-7_03L7Q' },
+    { id: 'tv-ebc57', name: '東森財經新聞台 (57台)', desc: 'EBC 57台 24小時線上直播 (東森電視官方線上直播訊號)', type: 'youtube', value: '1I2iq41Akmo', channelId: 'UCwJz31276_q2H78S8mH757w' },
     { id: 'tv-ttv', name: '台視新聞台', desc: 'TTV News 資訊台 24小時直播 (訊號正常發聲)', type: 'youtube', value: '9iRAqBMakXY', fallback: 'MaTO_CAzqJA', channelId: 'UC8ROUUjHzEQm-ndb69CX8Ww' },
     { id: 'tv-ctv', name: '中視新聞台', desc: 'CTV News 資訊台 24小時直播 (訊號正常發聲)', type: 'youtube', value: 'TCnaIE_SAtM', channelId: 'UCmH4q-YjeazayYCVHHkGAMA' },
     { id: 'tv-cts', name: '華視新聞台 (52台)', desc: 'CTS News CH52 資訊台 24小時直播 (訊號正常發聲)', type: 'youtube', value: 'wM0g8EoUZ_E', channelId: 'UCDCJyLpbfgeVE9iZiEam-Kg' },
