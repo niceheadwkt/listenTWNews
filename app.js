@@ -398,7 +398,13 @@ function playChannel(channel) {
     dom.playerChannelTitle.innerText = channel.name;
     const baseDesc = channel.desc || (channel.type === 'youtube' ? 'YouTube 影片/直播' : '廣播電台/串流音訊');
     if (channel.type === 'youtube') {
-        dom.playerChannelDesc.innerHTML = `${escapeHtml(baseDesc)} · <a href="https://www.youtube.com/watch?v=${channel.value}" target="_blank" rel="noopener noreferrer" style="color: var(--primary-neon); text-decoration: underline;">開啟 YouTube 直播頁</a>`;
+        let ytUrl = `https://www.youtube.com/watch?v=${channel.value}`;
+        if (channel.value.startsWith('@')) {
+            ytUrl = `https://www.youtube.com/${channel.value}/live`;
+        } else if (channel.value.startsWith('UC')) {
+            ytUrl = `https://www.youtube.com/channel/${channel.value}/live`;
+        }
+        dom.playerChannelDesc.innerHTML = `${escapeHtml(baseDesc)} · <a href="${ytUrl}" target="_blank" rel="noopener noreferrer" style="color: var(--primary-neon); text-decoration: underline;">開啟 YouTube 直播頁</a>`;
     } else if (channel.link) {
         dom.playerChannelDesc.innerHTML = `${escapeHtml(baseDesc)} · <a href="${channel.link}" target="_blank" rel="noopener noreferrer" style="color: var(--primary-neon); text-decoration: underline;">開啟官網播放頁</a>`;
     } else {
