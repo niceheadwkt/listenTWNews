@@ -13,7 +13,8 @@ const DEFAULT_TV_CHANNELS = [
     { id: 'tv-cti', name: '中天新聞台', desc: 'CTI News 24小時線上直播 (訊號正常發聲)', type: 'youtube', value: 'vr3XyVCR4T0', channelId: 'UCpu3bemTQwAU8PqM4kJdoEQ' },
     { id: 'tv-set', name: '三立新聞台', desc: 'SET News 24小時線上直播 (訊號正常發聲)', type: 'youtube', value: 'yeYC0mbSIOo', channelId: 'UC2TuODJhC03pLgd6MpWP0iw' },
     { id: 'tv-seti', name: '三立財經 iNEWS', desc: '三立財經 iNEWS 24小時線上直播 (訊號正常發聲)', type: 'youtube', value: 'pF507BLtbqU', channelId: 'UCQY7D1s081t_O2x0S-9P0_w' },
-    { id: 'tv-tvbs', name: 'TVBS 新聞台', desc: 'TVBS News 55頻道 24小時直播 (訊號正常發聲)', type: 'youtube', value: 'm_dhMSvUCIc', channelId: 'UC5nwNW4KdC0SzrhF9BXEYOQ' }
+    { id: 'tv-tvbs', name: 'TVBS 新聞台', desc: 'TVBS News 55頻道 24小時直播 (訊號正常發聲)', type: 'youtube', value: 'm_dhMSvUCIc', channelId: 'UC5nwNW4KdC0SzrhF9BXEYOQ' },
+    { id: 'tv-bcc', name: '中廣新聞網 (YouTube 直播)', desc: '中廣新聞網 YouTube 官方線上直播 (提供整點新聞與時事談話)', type: 'youtube', value: '@中廣新聞網BCC', channelId: 'UCkqrvXuqW7dN3E2_4v8Ha5Q' }
 ];
 
 // 預設廣播新聞頻道 (音訊串流)
