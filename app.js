@@ -371,6 +371,8 @@ function escapeHtml(str) {
    播放器控制核心
    ========================================== */
 
+
+
 // 播放指定頻道
 function playChannel(channel) {
     console.log("Playing channel:", channel);
@@ -414,6 +416,12 @@ function playChannel(channel) {
         // 廣播新聞 (Audio 串流) 模式
         dom.visualizerStatusText.innerText = '廣播電台載入中...';
         if (channel.id === 'radio-kiss') {
+            // 同步對 Audio 播放器設定一個空的/靜音源並播放，以在非同步 fetch 前建立 User Gesture
+            try {
+                dom.audioPlayer.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAAA";
+                dom.audioPlayer.play().catch(()=>{});
+            } catch(e){}
+
             resolveKissRadioUrl().then(resolvedUrl => {
                 dom.visualizerStatusText.innerText = '廣播電台播放中...';
                 playAudioStream(resolvedUrl);
@@ -540,6 +548,16 @@ async function playYoutubeVideo(videoId) {
 
     // 如果傳入的是 Channel ID 或 Handle，嘗試非同步動態抓取當下最新的直播 Video ID
     if (isChannelId || isHandle) {
+        // 在進行非同步 fetch 前，先同步將 YouTube 單例播放器靜音並播放，以在 click 呼叫棧中建立並保留 User Gesture
+        if (state.youtubePlayer && typeof state.youtubePlayer.playVideo === 'function') {
+            try {
+                state.youtubePlayer.mute();
+                state.youtubePlayer.playVideo();
+            } catch (e) {
+                console.log("同步解鎖 YouTube 播放器失敗:", e);
+            }
+        }
+
         const resolvedId = await resolveLiveVideoId(videoId);
         if (resolvedId) {
             targetVideoId = resolvedId;
@@ -1127,7 +1145,7 @@ document.addEventListener('DOMContentLoaded', initApp);
 
 // Register PWA service worker
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js')
+  navigator.serviceWorker.register('./sw.js')
     .then(() => console.log('✅ Service Worker registered'))
     .catch(err => console.error('❌ Service Worker registration failed', err));
 }
