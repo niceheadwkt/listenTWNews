@@ -20,9 +20,9 @@ const DEFAULT_TV_CHANNELS = [
 const DEFAULT_RADIO_CHANNELS = [
     { id: 'radio-icrt', name: 'ICRT 英文電台', desc: '台北國際社區廣播電台 英語新聞與流行樂', type: 'audio', value: 'https://stream.rcs.revma.com/nkdfurztxp3vv', link: 'https://www.icrt.com.tw/' },
     { id: 'radio-taipei', name: '台北廣播電台', desc: 'FM 93.1 台北市政、即時新聞與生活資訊 (HLS 串流)', type: 'audio', value: 'https://stream.ginnet.cloud/live0130lo-yfyo/_definst_/fm/playlist.m3u8', link: 'https://www.radio.gov.taipei/' },
-    { id: 'radio-goodnews', name: '佳音廣播電台', desc: 'FM 90.9 溫馨心靈音樂、生活資訊與經典民歌 (HLS 串流)', type: 'audio', value: 'https://stream.ginnet.cloud/live0119lo-p4rb/_definst_/fm909/playlist.m3u8', link: 'https://www.goodnews.org.tw/' },
+    { id: 'radio-goodnews', name: '佳音廣播電台', desc: 'FM 90.9 溫馨心靈音樂、生活資訊與經典民歌 (HLS 串流)', type: 'audio', value: 'https://stream.ginnet.cloud/live0119lo-p4rb/_definst_/fm909/playlist.m3u8', link: 'http://www.goodnews.org.tw/' },
     { id: 'radio-bcc-news', name: '中廣新聞網', desc: '即時新聞、時事評論與生活資訊節目 (BCC News)', type: 'audio', value: 'https://stream.rcs.revma.com/78fm9wyy2tzuv', link: 'https://www.bcc.com.tw/' },
-    { id: 'radio-ufo', name: '飛碟聯播網', desc: 'FM 92.1 飛碟電台，全天候流行音樂與新聞談話節目', type: 'audio', value: 'https://stream.rcs.revma.com/em90w4aeewzuv.m4a', link: 'http://www.uforadio.com.tw/' },
+    { id: 'radio-ufo', name: '飛碟聯播網', desc: 'FM 92.1 飛碟電台，全天候流行音樂與新聞談話節目', type: 'audio', value: 'https://stream.rcs.revma.com/em90w4aeewzuv.m4a', link: 'https://www.uforadio.com.tw/' },
     { id: 'radio-kiss', name: 'KISSRadio 聯播網', desc: 'FM 99.9 大眾廣播電台，當代流行音樂與娛樂資訊 (動態解析)', type: 'audio', value: 'https://kissradiow-hichannel.cdn.hinet.net/live/RA000040/playlist.m3u8', link: 'http://www.kiss.com.tw/radio_hq.php?radio_id=156' }
 ];
 
