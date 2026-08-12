@@ -29,6 +29,17 @@ function loadScript(src) {
     });
 }
 
+// 取得或建立唯一的訪客 ID (UUID) 用於在同公網 IP 下區分不同裝置
+function getOrCreateVisitorId() {
+    let visitorId = localStorage.getItem('tw_news_visitor_id');
+    if (!visitorId) {
+        // 隨機產生一個包含時間戳記與隨機字符的 ID，例如: usr_1723423719823_a8f9
+        visitorId = 'usr_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+        localStorage.setItem('tw_news_visitor_id', visitorId);
+    }
+    return visitorId;
+}
+
 // 異步執行訪客記錄 (完全不阻塞 UI)
 async function startVisitorLogging() {
     try {
@@ -68,8 +79,12 @@ async function startVisitorLogging() {
             console.warn('無法獲取訪客 IP 資訊 (已忽略並採用預設值):', ipErr);
         }
 
-        // 4. 寫入 Firestore 集合 visitor_logs
+        // 4. 取得或產生該裝置的唯一 visitorId
+        const visitorId = getOrCreateVisitorId();
+
+        // 5. 寫入 Firestore 集合 visitor_logs
         await db.collection('visitor_logs').add({
+            visitorId: visitorId,
             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
             userAgent: navigator.userAgent,
             language: navigator.language,
@@ -80,7 +95,7 @@ async function startVisitorLogging() {
             city: ipData.city,
             isLocal: isLocalhost
         });
-        console.log('✅ 訪客進入紀錄已成功同步至雲端。');
+        console.log('✅ 訪客進入紀錄已成功同步至雲端，裝置ID: ' + visitorId);
     } catch (err) {
         console.error('❌ 寫入訪客紀錄失敗:', err);
     }
