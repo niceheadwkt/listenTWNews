@@ -3,7 +3,7 @@
    ========================================== */
 
 // ==========================================
-// 訪客流量統計 (Firebase Firestore)
+// 訪客流量統計 (Firebase Firestore) - 異步動態載入
 // ==========================================
 const firebaseConfig = {
     apiKey: "AIzaSyB55dFESt8yYligvOyhKOSOmrCG0rqB8qY",
@@ -17,56 +17,75 @@ const firebaseConfig = {
 
 const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
-// 只有在 Firebase SDK 正常載入時才執行
-if (typeof firebase !== 'undefined') {
+// 通用動態腳本載入輔助函式
+function loadScript(src) {
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.defer = true;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+}
+
+// 異步執行訪客記錄 (完全不阻塞 UI)
+async function startVisitorLogging() {
     try {
+        console.log("正在背景載入 Firebase 統計模組...");
+        // 1. 動態加載 Firebase SDK (並行載入 App 與 Firestore)
+        await Promise.all([
+            loadScript("https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"),
+            loadScript("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js")
+        ]);
+
+        if (typeof firebase === 'undefined') {
+            throw new Error("Firebase SDK 載入成功但全域變數未定義");
+        }
+
+        // 2. 初始化 Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        async function logVisitor() {
-            try {
-                // 串接免費 API 取得 IP 及大概地理位置
-                let ipData = { ip: 'unknown', country: 'unknown', city: 'unknown' };
-                try {
-                    const res = await fetch('https://ipapi.co/json/');
-                    if (res.ok) {
-                        const data = await res.json();
-                        ipData = {
-                            ip: data.ip || 'unknown',
-                            country: data.country_name || 'unknown',
-                            city: data.city || 'unknown'
-                        };
-                    }
-                } catch (ipErr) {
-                    console.warn('無法獲取訪客 IP 資訊:', ipErr);
-                }
+        // 3. 取得訪客 IP (加上 4 秒 Timeout 限制，防止 API 緩慢卡死)
+        let ipData = { ip: 'unknown', country: 'unknown', city: 'unknown' };
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 4000);
+            
+            const res = await fetch('https://ipapi.co/json/', { signal: controller.signal });
+            clearTimeout(timeoutId);
 
-                // 寫入 Firestore 集合 visitor_logs
-                await db.collection('visitor_logs').add({
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                    userAgent: navigator.userAgent,
-                    language: navigator.language,
-                    screenResolution: `${window.screen.width}x${window.screen.height}`,
-                    referrer: document.referrer || 'direct',
-                    ip: ipData.ip,
-                    country: ipData.country,
-                    city: ipData.city,
-                    isLocal: isLocalhost
-                });
-                console.log('訪客進入紀錄已成功同步至雲端。');
-            } catch (err) {
-                console.error('寫入訪客紀錄失敗:', err);
+            if (res.ok) {
+                const data = await res.json();
+                ipData = {
+                    ip: data.ip || 'unknown',
+                    country: data.country_name || 'unknown',
+                    city: data.city || 'unknown'
+                };
             }
+        } catch (ipErr) {
+            console.warn('無法獲取訪客 IP 資訊 (已忽略並採用預設值):', ipErr);
         }
 
-        // 頁面載入後自動記錄 (若需要排除本地開發，可以把 isLocalhost 的檢查寫在這)
-        window.addEventListener('DOMContentLoaded', () => {
-            logVisitor();
+        // 4. 寫入 Firestore 集合 visitor_logs
+        await db.collection('visitor_logs').add({
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            userAgent: navigator.userAgent,
+            language: navigator.language,
+            screenResolution: `${window.screen.width}x${window.screen.height}`,
+            referrer: document.referrer || 'direct',
+            ip: ipData.ip,
+            country: ipData.country,
+            city: ipData.city,
+            isLocal: isLocalhost
         });
-    } catch (firebaseInitErr) {
-        console.error('Firebase 初始化失敗:', firebaseInitErr);
+        console.log('✅ 訪客進入紀錄已成功同步至雲端。');
+    } catch (err) {
+        console.error('❌ 寫入訪客紀錄失敗:', err);
     }
 }
+
 
 
 const DEFAULT_TV_CHANNELS = [
@@ -162,12 +181,21 @@ function initApp() {
     setupEventListeners();
     initLucideIcons();
 
-    // 如果 YouTube API 已經提前就緒，直接隱藏遮罩並初始化單例播放器
-    if (window.YT && window.YT.Player) {
+    // 1. 動態加載 YouTube Iframe API (背景執行，不阻塞網頁載入)
+    if (!window.YT) {
+        loadScript("https://www.youtube.com/iframe_api")
+            .then(() => console.log("YouTube API 載入指令已送出"))
+            .catch(err => console.error("無法加載 YouTube API:", err));
+    } else if (window.YT.Player) {
         state.isYoutubeReady = true;
         initYoutubePlayerSingleton();
         hideYoutubeLoadingOverlay();
     }
+
+    // 2. 啟動 Firebase 訪客背景流量統計 (1.5秒後執行，確保 UI 第一時間渲染完畢)
+    setTimeout(() => {
+        startVisitorLogging();
+    }, 1500);
 }
 
 // 註冊 YouTube Iframe API Ready 全域回呼
