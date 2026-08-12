@@ -11,6 +11,7 @@
 - **純聽/影片切換模式**：針對 YouTube 電視直播，提供一鍵「純聽模式」（隱藏影片，僅留音量控制與動態音波視覺化特效），方便只聽新聞不看畫面的使用者。
 - **極致現代美學**：採用暗色模式、Cyberpunk 霓虹發光漸層、玻璃擬態控制面板，並具備流暢的 CSS 動態音波跳動特效。
 - **向量 icon 設計**：採用純向量 `icon.svg` 圖示，自動適配手機各種解析度與安裝大小。
+- **訪客統計與紀錄**：串接 Firebase Firestore，在保障使用者隱私的前題下，記錄進站的 IP、概略地理位置、瀏覽器類型與進站時間。
 
 ## 🛠️ 技術架構
 
@@ -19,6 +20,7 @@
 - **影音 API**：YouTube Iframe Player API
 - **廣播技術**：HTML5 Audio API, [Hls.js](https://github.com/video-dev/hls.js/) (支援 HLS `.m3u8` 格式串流)
 - **圖示庫**：[Lucide Icons](https://lucide.dev/) (CDN 加載)
+- **雲端資料庫**：Firebase Firestore SDK (用於訪客統計紀錄)
 
 ## 📱 手機安裝與使用
 

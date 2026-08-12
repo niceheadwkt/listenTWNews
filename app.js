@@ -2,6 +2,73 @@
    台灣新聞收聽 App - 核心應用程式邏輯 (純聽無螢幕版)
    ========================================== */
 
+// ==========================================
+// 訪客流量統計 (Firebase Firestore)
+// ==========================================
+const firebaseConfig = {
+    apiKey: "AIzaSyB55dFESt8yYligvOyhKOSOmrCG0rqB8qY",
+    authDomain: "listentwnews.firebaseapp.com",
+    projectId: "listentwnews",
+    storageBucket: "listentwnews.firebasestorage.app",
+    messagingSenderId: "756254585422",
+    appId: "1:756254585422:web:ba8be3112392567734891f",
+    measurementId: "G-CFLKGRL9XN"
+};
+
+const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+// 只有在 Firebase SDK 正常載入時才執行
+if (typeof firebase !== 'undefined') {
+    try {
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        async function logVisitor() {
+            try {
+                // 串接免費 API 取得 IP 及大概地理位置
+                let ipData = { ip: 'unknown', country: 'unknown', city: 'unknown' };
+                try {
+                    const res = await fetch('https://ipapi.co/json/');
+                    if (res.ok) {
+                        const data = await res.json();
+                        ipData = {
+                            ip: data.ip || 'unknown',
+                            country: data.country_name || 'unknown',
+                            city: data.city || 'unknown'
+                        };
+                    }
+                } catch (ipErr) {
+                    console.warn('無法獲取訪客 IP 資訊:', ipErr);
+                }
+
+                // 寫入 Firestore 集合 visitor_logs
+                await db.collection('visitor_logs').add({
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    userAgent: navigator.userAgent,
+                    language: navigator.language,
+                    screenResolution: `${window.screen.width}x${window.screen.height}`,
+                    referrer: document.referrer || 'direct',
+                    ip: ipData.ip,
+                    country: ipData.country,
+                    city: ipData.city,
+                    isLocal: isLocalhost
+                });
+                console.log('訪客進入紀錄已成功同步至雲端。');
+            } catch (err) {
+                console.error('寫入訪客紀錄失敗:', err);
+            }
+        }
+
+        // 頁面載入後自動記錄 (若需要排除本地開發，可以把 isLocalhost 的檢查寫在這)
+        window.addEventListener('DOMContentLoaded', () => {
+            logVisitor();
+        });
+    } catch (firebaseInitErr) {
+        console.error('Firebase 初始化失敗:', firebaseInitErr);
+    }
+}
+
+
 const DEFAULT_TV_CHANNELS = [
     { id: 'tv-ftv', name: '民視新聞台', desc: 'Formosa TV News 24小時線上直播 (訊號正常發聲)', type: 'youtube', value: 'ylYJSBUgaMA', channelId: 'UC2VmWn8dAqkzlQqvy02E1PA' },
     { id: 'tv-ebc', name: '東森新聞台 (51台)', desc: 'EBC 51台 24小時線上直播 (東森電視官方線上直播訊號)', type: 'youtube', value: 'V1p33hqPrUk', channelId: 'UCR3asjvr_WAaxwJYEDV_Bfw' },
@@ -43,23 +110,23 @@ const dom = {
     youtubePlayerContainer: document.getElementById('youtube-player'),
     audioVisualizer: document.getElementById('audio-visualizer'),
     visualizerStatusText: document.getElementById('visualizer-status-text'),
-    
+
     // 控制列
     playPauseBtn: document.getElementById('play-pause-btn'),
     volumeSlider: document.getElementById('volume-slider'),
     volumeValue: document.getElementById('volume-value'),
     volumeIcon: document.getElementById('volume-icon'),
-    
+
     // 當前播放頻道資訊
     playerChannelType: document.getElementById('player-channel-type'),
     playerChannelTitle: document.getElementById('player-channel-title'),
     playerChannelDesc: document.getElementById('player-channel-desc'),
-    
+
     // 清單容器
     tvChannelList: document.getElementById('tv-channel-list'),
     radioChannelList: document.getElementById('radio-channel-list'),
     customChannelList: document.getElementById('custom-channel-list'),
-    
+
     // 表單與自訂管理
     addChannelForm: document.getElementById('add-channel-form'),
     newChannelName: document.getElementById('new-channel-name'),
@@ -94,7 +161,7 @@ function initApp() {
     renderChannelLists();
     setupEventListeners();
     initLucideIcons();
-    
+
     // 如果 YouTube API 已經提前就緒，直接隱藏遮罩並初始化單例播放器
     if (window.YT && window.YT.Player) {
         state.isYoutubeReady = true;
@@ -104,7 +171,7 @@ function initApp() {
 }
 
 // 註冊 YouTube Iframe API Ready 全域回呼
-window.onYouTubeIframeAPIReady = function() {
+window.onYouTubeIframeAPIReady = function () {
     state.isYoutubeReady = true;
     console.log("YouTube Player API Ready.");
     initYoutubePlayerSingleton();
@@ -209,15 +276,15 @@ function normalizeImportedChannels(raw) {
     }
 
     return channelArray.map((channel, index) => {
-        const name = typeof channel.name === 'string' && channel.name.trim() 
-            ? channel.name.trim() 
+        const name = typeof channel.name === 'string' && channel.name.trim()
+            ? channel.name.trim()
             : (typeof channel.title === 'string' && channel.title.trim() ? channel.title.trim() : `自訂頻道 ${index + 1}`);
-        
+
         let type = channel.type;
-        let rawVal = typeof channel.value === 'string' && channel.value.trim() 
-            ? channel.value.trim() 
-            : (typeof channel.url === 'string' && channel.url.trim() 
-                ? channel.url.trim() 
+        let rawVal = typeof channel.value === 'string' && channel.value.trim()
+            ? channel.value.trim()
+            : (typeof channel.url === 'string' && channel.url.trim()
+                ? channel.url.trim()
                 : (typeof channel.link === 'string' ? channel.link.trim() : ''));
 
         const desc = typeof channel.desc === 'string' ? channel.desc.trim() : '';
@@ -261,10 +328,10 @@ function normalizeImportedChannels(raw) {
 function renderChannelLists() {
     // 渲染電視頻道
     renderGrid(DEFAULT_TV_CHANNELS, dom.tvChannelList, 'tv');
-    
+
     // 渲染廣播頻道
     renderGrid(DEFAULT_RADIO_CHANNELS, dom.radioChannelList, 'radio');
-    
+
     // 渲染自訂頻道
     renderCustomGrid();
 }
@@ -291,7 +358,7 @@ function renderCustomGrid() {
         initLucideIcons();
         return;
     }
-    
+
     container.innerHTML = '';
     state.customChannels.forEach(channel => {
         const card = createChannelCard(channel, 'custom');
@@ -308,13 +375,13 @@ function createChannelCard(channel, category) {
     if (state.currentChannel && state.currentChannel.id === channel.id) {
         card.classList.add('playing');
     }
-    
+
     // 根據類型選擇圖示
     let iconName = 'tv';
     if (channel.type === 'audio') {
         iconName = 'mic';
     }
-    
+
     card.innerHTML = `
         <div class="channel-main">
             <div class="channel-icon-wrapper">
@@ -326,33 +393,33 @@ function createChannelCard(channel, category) {
             </div>
         </div>
         <div class="play-state-indicator">
-            ${state.currentChannel && state.currentChannel.id === channel.id && state.isPlaying 
-                ? '<i data-lucide="volume-2"></i>' 
-                : '<i data-lucide="play" class="hover-play-icon"></i>'}
+            ${state.currentChannel && state.currentChannel.id === channel.id && state.isPlaying
+            ? '<i data-lucide="volume-2"></i>'
+            : '<i data-lucide="play" class="hover-play-icon"></i>'}
         </div>
     `;
-    
+
     // 如果是自訂分頁，加入刪除按鈕
     if (category === 'custom') {
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'delete-channel-btn';
         deleteBtn.title = '刪除頻道';
         deleteBtn.innerHTML = '<i data-lucide="trash-2"></i>';
-        
+
         // 阻止冒泡，避免點擊刪除按鈕觸發播放
         deleteBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             deleteCustomChannel(channel.id);
         });
-        
+
         card.appendChild(deleteBtn);
     }
-    
+
     // 點選卡片播放
     card.addEventListener('click', () => {
         playChannel(channel);
     });
-    
+
     return card;
 }
 
@@ -376,23 +443,23 @@ function escapeHtml(str) {
 // 播放指定頻道
 function playChannel(channel) {
     console.log("Playing channel:", channel);
-    
+
     // 若點選相同的頻道，且正在播放，則執行暫停；若暫停，則執行播放
     if (state.currentChannel && state.currentChannel.id === channel.id) {
         togglePlayPause();
         return;
     }
-    
+
     // 停止目前播放中的所有音訊/影片
     stopAllPlayers();
-    
+
     state.currentChannel = channel;
     state.isPlaying = true;
-    
+
     // 更新控制按鈕狀態
     dom.playPauseBtn.disabled = false;
     dom.playPauseBtn.innerHTML = '<i data-lucide="pause"></i>';
-    
+
     // 更新當前頻道文字資訊
     dom.playerChannelTitle.innerText = channel.name;
     const baseDesc = channel.desc || (channel.type === 'youtube' ? 'YouTube 影片/直播' : '廣播電台/串流音訊');
@@ -410,10 +477,10 @@ function playChannel(channel) {
         dom.playerChannelDesc.innerText = baseDesc;
     }
     dom.playerChannelType.innerText = channel.type === 'youtube' ? '電視直播 (僅聽音訊)' : '廣播電台';
-    
+
     // 啟動音波動畫
     dom.audioVisualizer.classList.add('playing');
-    
+
     if (channel.type === 'youtube') {
         // 電視新聞 (YouTube 直播) 模式 - 後台播放音訊
         dom.visualizerStatusText.innerText = '電視直播音訊載入中...';
@@ -425,8 +492,8 @@ function playChannel(channel) {
             // 同步對 Audio 播放器設定一個空的/靜音源並播放，以在非同步 fetch 前建立 User Gesture
             try {
                 dom.audioPlayer.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAAA";
-                dom.audioPlayer.play().catch(()=>{});
-            } catch(e){}
+                dom.audioPlayer.play().catch(() => { });
+            } catch (e) { }
 
             resolveKissRadioUrl().then(resolvedUrl => {
                 dom.visualizerStatusText.innerText = '廣播電台播放中...';
@@ -440,7 +507,7 @@ function playChannel(channel) {
             playAudioStream(channel.value);
         }
     }
-    
+
     // 更新所有清單的選取狀態
     updatePlayingStatusUI();
     initLucideIcons();
@@ -451,13 +518,13 @@ function stopAllPlayers() {
     // 停止 HTML5 Audio
     dom.audioPlayer.pause();
     dom.audioPlayer.src = '';
-    
+
     // 銷毀 HLS.js 實例
     if (state.hlsInstance) {
         state.hlsInstance.destroy();
         state.hlsInstance = null;
     }
-    
+
     // 暫停 YouTube 播放器，而不是銷毀它
     if (state.youtubePlayer && typeof state.youtubePlayer.pauseVideo === 'function') {
         try {
@@ -466,7 +533,7 @@ function stopAllPlayers() {
             console.error("暫停 YouTube 播放器失敗:", e);
         }
     }
-    
+
     state.isPlaying = false;
     dom.playPauseBtn.innerHTML = '<i data-lucide="play"></i>';
     dom.audioVisualizer.classList.remove('playing');
@@ -477,7 +544,7 @@ function stopAllPlayers() {
 // 播放/暫停切換
 function togglePlayPause() {
     if (!state.currentChannel) return;
-    
+
     if (state.isPlaying) {
         // 暫停
         if (state.currentChannel.type === 'youtube') {
@@ -507,7 +574,7 @@ function togglePlayPause() {
         dom.audioVisualizer.classList.add('playing');
         dom.visualizerStatusText.innerText = state.currentChannel.type === 'youtube' ? '電視直播音訊播放中...' : '廣播電台播放中...';
     }
-    
+
     updatePlayingStatusUI();
     initLucideIcons();
 }
@@ -537,7 +604,7 @@ async function resolveLiveVideoId(channelOrHandle) {
                             return match[1];
                         }
                     }
-                } catch (err) {}
+                } catch (err) { }
             }
         }
     } catch (e) {
@@ -610,7 +677,7 @@ function createYoutubePlayer(videoId) {
 
     try {
         const isChannelId = videoId.length === 24 && videoId.startsWith('UC');
-        
+
         let playerOptions = {
             height: '100%',
             width: '100%',
@@ -662,7 +729,7 @@ function createYoutubePlayer(videoId) {
             // 如果是頻道 ID，我們必須手動把 iframe 的 src 設定為 live_stream
             const wrapper = document.getElementById('video-wrapper');
             wrapper.innerHTML = `<iframe id="youtube-player" width="100%" height="100%" src="https://www.youtube.com/embed/live_stream?channel=${videoId}&enablejsapi=1&autoplay=1&mute=0&controls=0&origin=${window.location.origin}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-            
+
             // 然後我們用 YT.Player 來綁定這個 iframe 以控制音量和狀態
             state.youtubePlayer = new YT.Player('youtube-player', {
                 events: playerOptions.events
@@ -683,7 +750,7 @@ function createYoutubePlayer(videoId) {
 function handleYoutubePlayerStateChange(playerState) {
     if (playerState === YT.PlayerState.PLAYING) {
         state.isPlaying = true;
-        
+
         // 確保播放時強迫解開靜音並同步設定音量
         if (state.youtubePlayer) {
             try {
@@ -693,7 +760,7 @@ function handleYoutubePlayerStateChange(playerState) {
                 if (typeof state.youtubePlayer.setVolume === 'function') {
                     state.youtubePlayer.setVolume(state.volume);
                 }
-            } catch (e) {}
+            } catch (e) { }
         }
 
         dom.playPauseBtn.innerHTML = '<i data-lucide="pause"></i>';
@@ -741,12 +808,12 @@ async function resolveKissRadioUrl() {
 function playAudioStream(url) {
     const audio = dom.audioPlayer;
     audio.volume = state.volume / 100;
-    
+
     if (state.hlsInstance) {
         state.hlsInstance.destroy();
         state.hlsInstance = null;
     }
-    
+
     // 統一的錯誤處理機制，用以在播放失敗時重置 UI 狀態
     const handlePlayError = (err) => {
         console.error("音訊播放失敗，可能是失效的網址或有 CORS 安全限制:", err);
@@ -794,7 +861,7 @@ function setVolume(val) {
     state.volume = val;
     dom.volumeSlider.value = val;
     dom.volumeValue.innerText = `${val}%`;
-    
+
     // 同步更新圖示
     if (val == 0) {
         dom.volumeIcon.setAttribute('data-lucide', 'volume-x');
@@ -806,14 +873,14 @@ function setVolume(val) {
         dom.volumeIcon.setAttribute('data-lucide', 'volume-2');
     }
     initLucideIcons();
-    
+
     // 更新 YouTube 音量
     if (state.youtubePlayer && typeof state.youtubePlayer.setVolume === 'function') {
         try {
             state.youtubePlayer.setVolume(val);
-        } catch (e) {}
+        } catch (e) { }
     }
-    
+
     // 更新 HTML5 Audio 音量
     dom.audioPlayer.volume = val / 100;
 }
@@ -824,7 +891,7 @@ function updatePlayingStatusUI() {
     cards.forEach(card => {
         const id = card.dataset.id;
         const indicator = card.querySelector('.play-state-indicator');
-        
+
         if (state.currentChannel && id === state.currentChannel.id) {
             card.classList.add('playing');
             if (state.isPlaying) {
@@ -847,25 +914,25 @@ function updatePlayingStatusUI() {
 // 解析 YouTube 網址取得 Video ID 或 Channel ID (支援 /channel/UC.../live 直播捷徑)
 function extractYoutubeId(url) {
     if (!url) return '';
-    
+
     const trimmed = url.trim();
-    
+
     // 如果長度為 11 且不包含網址特殊字元，可能已經是 Video ID
     if (trimmed.length === 11 && !trimmed.includes('/') && !trimmed.includes('.')) {
         return trimmed;
     }
-    
+
     // 如果長度為 24 且以 UC 開頭，可能已經是 Channel ID
     if (trimmed.length === 24 && trimmed.startsWith('UC') && !trimmed.includes('/') && !trimmed.includes('.')) {
         return trimmed;
     }
-    
+
     // 檢查 Channel ID 網址 (包含 /channel/UC.../live 或 /channel/UC...)
     const channelMatch = trimmed.match(/(?:youtube\.com\/channel\/)(UC[a-zA-Z0-9_-]{22})(?:\/live)?/);
     if (channelMatch && channelMatch[1]) {
         return channelMatch[1];
     }
-    
+
     // 檢查一般影片 ID 網址 (11 位)
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
     const match = trimmed.match(regExp);
@@ -876,7 +943,7 @@ function extractYoutubeId(url) {
 function addCustomChannel(name, type, urlVal) {
     let resolvedValue = urlVal.trim();
     let desc = '';
-    
+
     if (type === 'youtube') {
         const youtubeId = extractYoutubeId(resolvedValue);
         if (!youtubeId) {
@@ -893,7 +960,7 @@ function addCustomChannel(name, type, urlVal) {
         }
         desc = '自訂音訊串流廣播';
     }
-    
+
     const newChannel = {
         id: `custom-${Date.now()}`,
         name: name.trim(),
@@ -901,11 +968,11 @@ function addCustomChannel(name, type, urlVal) {
         type: type,
         value: resolvedValue
     };
-    
+
     state.customChannels.push(newChannel);
     saveCustomChannels();
     renderCustomGrid();
-    
+
     // 重設表單並收起面板
     dom.addChannelForm.reset();
     if (dom.addChannelPane) {
@@ -914,7 +981,7 @@ function addCustomChannel(name, type, urlVal) {
     if (dom.toggleAddPaneBtn) {
         dom.toggleAddPaneBtn.classList.remove('active');
     }
-    
+
     // 自動切換到自訂頻道分頁，方便觀看新增結果
     switchTab('custom');
 }
@@ -932,7 +999,7 @@ function deleteCustomChannel(id) {
             dom.audioVisualizer.classList.remove('playing');
             dom.visualizerStatusText.innerText = '請點選下方新聞頻道';
         }
-        
+
         state.customChannels = state.customChannels.filter(c => c.id !== id);
         saveCustomChannels();
         renderCustomGrid();
@@ -947,14 +1014,14 @@ function toggleCustomPane(paneType) {
         const isHidden = dom.addChannelPane.style.display === 'none';
         dom.addChannelPane.style.display = isHidden ? 'block' : 'none';
         dom.transferChannelPane.style.display = 'none';
-        
+
         dom.toggleAddPaneBtn.classList.toggle('active', isHidden);
         dom.toggleTransferPaneBtn.classList.remove('active');
     } else if (paneType === 'transfer') {
         const isHidden = dom.transferChannelPane.style.display === 'none';
         dom.transferChannelPane.style.display = isHidden ? 'block' : 'none';
         dom.addChannelPane.style.display = 'none';
-        
+
         dom.toggleTransferPaneBtn.classList.toggle('active', isHidden);
         dom.toggleAddPaneBtn.classList.remove('active');
     }
@@ -1002,11 +1069,11 @@ function importCustomChannelsJson(file) {
             state.customChannels = importedChannels;
             saveCustomChannels();
             renderCustomGrid();
-            
+
             // 收起轉移面板
             dom.transferChannelPane.style.display = 'none';
             dom.toggleTransferPaneBtn.classList.remove('active');
-            
+
             alert('自訂頻道已成功由 JSON 檔案讀取匯入！');
         } catch (err) {
             alert(`JSON 檔案讀取失敗：${err.message}`);
@@ -1040,12 +1107,12 @@ function importCustomChannelsText() {
         state.customChannels = importedChannels;
         saveCustomChannels();
         renderCustomGrid();
-        
+
         // 清空輸入並收起轉移面板
         dom.customChannelsTextInput.value = '';
         dom.transferChannelPane.style.display = 'none';
         dom.toggleTransferPaneBtn.classList.remove('active');
-        
+
         alert(`成功匯入 ${importedChannels.length} 個自訂頻道！`);
     } catch (err) {
         alert(`JSON 內容解析失敗：${err.message}`);
@@ -1066,7 +1133,7 @@ function switchTab(tabId) {
             btn.classList.remove('active');
         }
     });
-    
+
     // 切換 Tab 內容顯示
     document.querySelectorAll('.tab-pane').forEach(pane => {
         if (pane.id === `tab-${tabId}`) {
@@ -1084,17 +1151,17 @@ function setupEventListeners() {
             switchTab(btn.dataset.tab);
         });
     });
-    
+
     // 播放/暫停按鈕
     dom.playPauseBtn.addEventListener('click', () => {
         togglePlayPause();
     });
-    
+
     // 音量滑桿
     dom.volumeSlider.addEventListener('input', (e) => {
         setVolume(parseInt(e.target.value));
     });
-    
+
     // 靜音切換 (點擊音量圖示)
     let previousVolume = 80;
     dom.volumeIcon.addEventListener('click', () => {
@@ -1105,7 +1172,7 @@ function setupEventListeners() {
             setVolume(previousVolume);
         }
     });
-    
+
     // 新增頻道表單送出
     dom.addChannelForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -1151,7 +1218,7 @@ document.addEventListener('DOMContentLoaded', initApp);
 
 // Register PWA service worker
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js')
-    .then(() => console.log('✅ Service Worker registered'))
-    .catch(err => console.error('❌ Service Worker registration failed', err));
+    navigator.serviceWorker.register('./sw.js')
+        .then(() => console.log('✅ Service Worker registered'))
+        .catch(err => console.error('❌ Service Worker registration failed', err));
 }
