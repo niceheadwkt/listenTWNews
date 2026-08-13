@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>台灣新聞全球收聽台 - Taiwan News Radio & TV</title>
     
     <!-- Google Fonts -->
@@ -162,52 +162,56 @@
                              </div>
 
                              <!-- 面板一：新增自訂頻道表單 (預設折疊隱藏) -->
-                             <div class="add-channel-box glass-card collapsible-pane" id="add-channel-pane" style="display: none;">
-                                 <h3><i data-lucide="plus-circle"></i> 新增自訂頻道</h3>
-                                 <form id="add-channel-form">
-                                    <div class="form-group">
-                                        <label for="new-channel-name">頻道名稱</label>
-                                        <input type="text" id="new-channel-name" placeholder="例如：我的自訂新聞" required>
-                                    </div>
-                                    <div class="form-row">
+                             <div class="glass-card collapsible-pane" id="add-channel-pane">
+                                 <div class="collapsible-pane-content add-channel-box">
+                                     <h3><i data-lucide="plus-circle"></i> 新增自訂頻道</h3>
+                                     <form id="add-channel-form">
                                         <div class="form-group">
-                                            <label for="new-channel-type">頻道類型</label>
-                                            <select id="new-channel-type" required>
-                                                <option value="youtube">YouTube 直播 (純聽音訊)</option>
-                                                <option value="audio">廣播/音訊串流 (MP3/HLS)</option>
-                                            </select>
+                                            <label for="new-channel-name">頻道名稱</label>
+                                            <input type="text" id="new-channel-name" placeholder="例如：我的自訂新聞" required>
                                         </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="new-channel-url">直播網址 或 YouTube 影片 ID</label>
-                                        <input type="text" id="new-channel-url" placeholder="輸入網址，例 https://www.youtube.com/watch?v=..." required>
-                                        <small class="form-help">支援 YouTube 影片連結或 .mp3 / .m3u8 串流網址</small>
-                                    </div>
-                                    <button type="submit" class="submit-btn">
-                                        <i data-lucide="plus"></i> 加入頻道清單
-                                     </button>
-                                 </form>
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label for="new-channel-type">頻道類型</label>
+                                                <select id="new-channel-type" required>
+                                                    <option value="youtube">YouTube 直播 (純聽音訊)</option>
+                                                    <option value="audio">廣播/音訊串流 (MP3/HLS)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="new-channel-url">直播網址 或 YouTube 影片 ID</label>
+                                            <input type="text" id="new-channel-url" placeholder="輸入網址，例 https://www.youtube.com/watch?v=..." required>
+                                            <small class="form-help">支援 YouTube 影片連結或 .mp3 / .m3u8 串流網址</small>
+                                        </div>
+                                        <button type="submit" class="submit-btn">
+                                            <i data-lucide="plus"></i> 加入頻道清單
+                                         </button>
+                                     </form>
+                                 </div>
                              </div>
 
                              <!-- 面板二：匯入 / 匯出 JSON 檔案 (預設折疊隱藏) -->
-                             <div class="transfer-channel-box glass-card collapsible-pane" id="transfer-channel-pane" style="display: none;">
-                                 <h3><i data-lucide="file-json"></i> 匯入與匯出 JSON 頻道資料</h3>
-                                 <p class="form-help" style="margin-bottom: 12px;">支援選取 .json 備份檔案，或直接貼上 JSON 設定內容進行匯入。</p>
-                                 <div class="transfer-actions">
-                                     <button type="button" class="utility-btn" id="export-json-file-btn">
-                                         <i data-lucide="download"></i> 匯出 JSON 檔案
-                                     </button>
-                                     <button type="button" class="utility-btn secondary" id="import-json-trigger-btn">
-                                         <i data-lucide="upload"></i> 選擇 JSON 檔案匯入
-                                     </button>
-                                     <input type="file" id="import-json-file-input" accept=".json,application/json" style="display: none;">
-                                 </div>
-                                 <div class="form-group transfer-input-group" style="margin-top: 15px;">
-                                     <label for="custom-channels-text-input">或直接貼上 JSON 內容匯入：</label>
-                                     <textarea id="custom-channels-text-input" rows="3" placeholder='格式如：[{"name": "TVBS NEWS", "type": "youtube", "value": "m_dhMSvUCIc"}]'></textarea>
-                                     <button type="button" class="utility-btn secondary" id="import-text-btn" style="margin-top: 8px; width: 100%;">
-                                         <i data-lucide="file-text"></i> 匯入貼上內容
-                                     </button>
+                             <div class="glass-card collapsible-pane" id="transfer-channel-pane">
+                                 <div class="collapsible-pane-content transfer-channel-box">
+                                     <h3><i data-lucide="file-json"></i> 匯入與匯出 JSON 頻道資料</h3>
+                                     <p class="form-help">支援選取 .json 備份檔案，或直接貼上 JSON 設定內容進行匯入。</p>
+                                     <div class="transfer-actions">
+                                         <button type="button" class="utility-btn" id="export-json-file-btn">
+                                             <i data-lucide="download"></i> 匯出 JSON 檔案
+                                         </button>
+                                         <button type="button" class="utility-btn secondary" id="import-json-trigger-btn">
+                                             <i data-lucide="upload"></i> 選擇 JSON 檔案匯入
+                                         </button>
+                                         <input type="file" id="import-json-file-input" accept=".json,application/json" style="display: none;">
+                                     </div>
+                                     <div class="form-group transfer-input-group">
+                                         <label for="custom-channels-text-input">或直接貼上 JSON 內容匯入：</label>
+                                         <textarea id="custom-channels-text-input" rows="3" placeholder='格式如：[{"name": "TVBS NEWS", "type": "youtube", "value": "m_dhMSvUCIc"}]'></textarea>
+                                         <button type="button" class="utility-btn secondary" id="import-text-btn">
+                                             <i data-lucide="file-text"></i> 匯入貼上內容
+                                         </button>
+                                     </div>
                                  </div>
                              </div>
                              

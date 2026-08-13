@@ -909,7 +909,7 @@ function addCustomChannel(name, type, urlVal) {
     // 重設表單並收起面板
     dom.addChannelForm.reset();
     if (dom.addChannelPane) {
-        dom.addChannelPane.style.display = 'none';
+        dom.addChannelPane.classList.remove('expanded');
     }
     if (dom.toggleAddPaneBtn) {
         dom.toggleAddPaneBtn.classList.remove('active');
@@ -944,19 +944,31 @@ function toggleCustomPane(paneType) {
     if (!dom.addChannelPane || !dom.transferChannelPane) return;
 
     if (paneType === 'add') {
-        const isHidden = dom.addChannelPane.style.display === 'none';
-        dom.addChannelPane.style.display = isHidden ? 'block' : 'none';
-        dom.transferChannelPane.style.display = 'none';
-        
-        dom.toggleAddPaneBtn.classList.toggle('active', isHidden);
-        dom.toggleTransferPaneBtn.classList.remove('active');
+        const isExpanded = dom.addChannelPane.classList.contains('expanded');
+        if (isExpanded) {
+            dom.addChannelPane.classList.remove('expanded');
+            dom.toggleAddPaneBtn.classList.remove('active');
+        } else {
+            dom.addChannelPane.classList.add('expanded');
+            dom.toggleAddPaneBtn.classList.add('active');
+            
+            // 關閉另一個
+            dom.transferChannelPane.classList.remove('expanded');
+            dom.toggleTransferPaneBtn.classList.remove('active');
+        }
     } else if (paneType === 'transfer') {
-        const isHidden = dom.transferChannelPane.style.display === 'none';
-        dom.transferChannelPane.style.display = isHidden ? 'block' : 'none';
-        dom.addChannelPane.style.display = 'none';
-        
-        dom.toggleTransferPaneBtn.classList.toggle('active', isHidden);
-        dom.toggleAddPaneBtn.classList.remove('active');
+        const isExpanded = dom.transferChannelPane.classList.contains('expanded');
+        if (isExpanded) {
+            dom.transferChannelPane.classList.remove('expanded');
+            dom.toggleTransferPaneBtn.classList.remove('active');
+        } else {
+            dom.transferChannelPane.classList.add('expanded');
+            dom.toggleTransferPaneBtn.classList.add('active');
+            
+            // 關閉另一個
+            dom.addChannelPane.classList.remove('expanded');
+            dom.toggleAddPaneBtn.classList.remove('active');
+        }
     }
     initLucideIcons();
 }
@@ -1004,7 +1016,7 @@ function importCustomChannelsJson(file) {
             renderCustomGrid();
             
             // 收起轉移面板
-            dom.transferChannelPane.style.display = 'none';
+            dom.transferChannelPane.classList.remove('expanded');
             dom.toggleTransferPaneBtn.classList.remove('active');
             
             alert('自訂頻道已成功由 JSON 檔案讀取匯入！');
@@ -1043,7 +1055,7 @@ function importCustomChannelsText() {
         
         // 清空輸入並收起轉移面板
         dom.customChannelsTextInput.value = '';
-        dom.transferChannelPane.style.display = 'none';
+        dom.transferChannelPane.classList.remove('expanded');
         dom.toggleTransferPaneBtn.classList.remove('active');
         
         alert(`成功匯入 ${importedChannels.length} 個自訂頻道！`);
