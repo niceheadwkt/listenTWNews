@@ -35,7 +35,8 @@
 - [x] 將 PWA Service Worker 註冊改為相對路徑 `./sw.js` 以增加子目錄部署相容性 (`app.js`)
 - [x] 調整行動端 RWD 版面並新增底部安全區域 (`safe-area-inset-bottom`) 支援 (`style.css`)
 - [x] 實作 5 大 UI/UX 設計與行動端適配優化（包含 Obsidian 暗黑美學、CSS Grid 平滑高度手風琴展開、真實參差音波動畫、小螢幕 Icon+微文字 Tab 與物理按壓微縮放回饋），並通過實機驗證 (`index.html`, `app.js`, `style.css`)
-
+- [x] 成功將專案從 Vite 打包還原為最單純的無打包 (No-Build) 純靜態網頁架構，移除 package.json，並將 PWA 靜態資源搬回根目錄 (`.gitignore`, `index.html`)
+- [x] 實作 PWA 強制快取刷新機制（升級 sw.js 快取至 v11、style.css 加上 v12 版本號），完全排除部署切換時的瀏覽器快取跑版問題，並通過 Vercel 實機上線驗證 (`sw.js`, `index.html`)
 
 
 ## 關鍵設計決策
@@ -46,7 +47,7 @@
 3. **自訂頻道本機儲存**：
    - 自訂頻道只儲存在目前裝置的 `localStorage`；JSON 匯入會覆蓋現有自訂頻道清單，使用前會要求確認。
 4. **PWA App Shell 快取**：
-   - Service Worker 只快取同網域的介面檔案；YouTube、CDN 與外部廣播串流不會被快取，因此離線只能載入介面，不能保證播放內容可用。
+   - Service Worker 只快取同網域的介面檔案；YouTube, CDN 與外部廣播串流不會被快取，因此離線只能載入介面，不能保證播放內容可用。
 
 ## 資料夾結構
 ```
@@ -62,8 +63,8 @@ listenTWNews/
 ```
 
 ## 下次開工優先事項
-1. **部署發佈與 PWA 安裝測試**：於實際手機設備（特別是 iOS Safari 及行動版 Chrome）上，測試由雲端託管端安裝此 PWA，驗證 Service Worker 離線快取功能。
-2. **補充正式的隱私權說明**：明確說明 Firebase 訪客紀錄、ipapi.co 查詢、第三方 CDN、YouTube 與廣播服務的資料流向及保存政策。
+1. **持續追蹤 YouTube 電視直播嵌入狀態**：隨時監看是否有其他電視台官方調整第三方內嵌限制 (Error 153/150)，並及時修正或提供直連連結。
+2. **語音複製服務 (TTS) 深度整合**：於未來版本中，更緊密對接並測試 `voxcpm2-voice-cloner` 等外部語音克隆 API。
 
 ## 開發守則與約定
 1. **不可隨意刪除定義資料**：嚴禁在未告知使用者的情況下隨意刪除程式碼中已定義的預設頻道、設定或任何資料。若因故需要移除，**必須先向使用者說明並取得確認同意**後，方可進行刪除。
