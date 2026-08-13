@@ -11,16 +11,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     
     <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@latest" defer></script>
     
     <!-- HLS.js (for HLS m3u8 stream support in browser) -->
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest" defer></script>
     
     <!-- Custom Style -->
     <link rel="stylesheet" href="style.css">
-    
-    <!-- YouTube Iframe API (提前並行下載) -->
-    <script src="https://www.youtube.com/iframe_api" defer></script>
 
     <!-- PWA Meta Tags & Mobile Support -->
     <link rel="manifest" href="manifest.json">
@@ -234,17 +231,6 @@
     </div>
 
     <!-- Core Application Logic -->
-    <script src="app.js?v=10"></script>
-
-    <!-- Register PWA Service Worker -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then((reg) => console.log('Service Worker 註冊成功，範圍：', reg.scope))
-                    .catch((err) => console.error('Service Worker 註冊失敗：', err));
-            });
-        }
-    </script>
+    <script src="app.js?v=11" defer></script>
 </body>
 </html>

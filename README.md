@@ -6,11 +6,12 @@
 
 - **電視與廣播整合**：無縫切換 YouTube 電視直播與 HTML5/HLS 廣播音訊串流。
 - **可安裝至手機 (PWA)**：支援在 Android (Chrome) 與 iOS (Safari) 設備上「安裝」或「加入主畫面」，擁有專屬桌面圖示，開啟時全螢幕顯示（無網址列）。
-- **完全離線載入 UI**：透過 Service Worker 快取，即使離線也能瞬間載入 App 介面，連網時即時拉取新聞串流。
+- **App Shell 離線載入**：透過 Service Worker 快取同網域介面資源；離線時可載入 UI，但無法保證外部直播與廣播串流可播放。
 - **自訂頻道管理**：支援輸入 YouTube 網址或音訊串流網址 (`.mp3`、`.m3u8` 等)，新增後自動儲存至 LocalStorage。
-- **純聽/影片切換模式**：針對 YouTube 電視直播，提供一鍵「純聽模式」（隱藏影片，僅留音量控制與動態音波視覺化特效），方便只聽新聞不看畫面的使用者。
+- **純聽模式**：YouTube 影片畫面由音波遮罩覆蓋，介面主要提供音訊、音量控制與動態音波視覺化效果。
 - **極致現代美學**：採用暗色模式、Cyberpunk 霓虹發光漸層、玻璃擬態控制面板，並具備流暢的 CSS 動態音波跳動特效。
 - **向量 icon 設計**：採用純向量 `icon.svg` 圖示，自動適配手機各種解析度與安裝大小。
+- **訪客統計與紀錄**：串接 Firebase Firestore，在保障使用者隱私的前題下，記錄進站的 IP、概略地理位置、瀏覽器類型與進站時間。
 
 ## 🛠️ 技術架構
 
@@ -19,6 +20,9 @@
 - **影音 API**：YouTube Iframe Player API
 - **廣播技術**：HTML5 Audio API, [Hls.js](https://github.com/video-dev/hls.js/) (支援 HLS `.m3u8` 格式串流)
 - **圖示庫**：[Lucide Icons](https://lucide.dev/) (CDN 加載)
+- **雲端資料庫**：Firebase Firestore SDK (用於訪客統計紀錄)
+- **IP 地理資訊**：ipapi.co（背景查詢概略 IP、國家與城市）
+- **動態解析代理**：AllOrigins、Corsproxy.io（解析 YouTube 直播頁與 KISSRadio HLS 網址）
 
 ## 📱 手機安裝與使用
 
@@ -152,11 +156,27 @@ npx serve .
 
 ## ⚙️ 功能說明
 
-- **電視直播**：支援 YouTube **Channel ID** 與普通 **Video ID**，自動導向最新直播畫面。
-- **廣播音訊**：支援 `.mp3`、`.m3u8` 等 HTTPS 串流，使用 HTML5 Audio 或 Hls.js 播放。
-- **純聽模式**：隱藏影片畫面，只保留音量與視覺化音波特效。
-- **自訂頻道**：使用者可自行新增 YouTube 或音訊串流，資料儲存於 `localStorage`。
-- **離線快取**：透過 Service Worker (`sw.js`) 快取 UI 與資源，即使離線亦可使用介面。
+- **預設電視頻道**：提供多個台灣新聞 YouTube 頻道，支援 Video ID、Channel ID 與 YouTube Handle。
+- **最新直播解析**：Channel ID 或 Handle 會透過外部代理嘗試找出最新直播 Video ID；影片失效時會嘗試重新解析或使用備援 ID。
+- **影像收看（外開 YouTube）**：本 App 採用純聽無螢幕設計（音波遮罩覆蓋影像），但播放 YouTube 頻道時，左側當前頻道資訊下方會即時提供 **「開啟 YouTube 直播頁」** 連結；遇嵌入限制錯誤（101、150、153）時也會自動在新分頁外開。
+- **預設廣播頻道**：提供 ICRT、台北廣播電台、佳音、飛碟與 KISSRadio 等音訊串流。
+- **HLS 與一般音訊**：`.m3u8` 使用 Hls.js 或 Safari 原生 HLS；其他網址交由 HTML5 Audio 播放。
+- **KISSRadio 動態網址**：播放 KISSRadio 時會先透過代理取得目前帶 token 的 HLS 網址，失敗時回退至預設網址。
+- **播放控制**：支援播放、暫停、切換頻道、音量調整與點擊音量圖示靜音/恢復音量。
+- **自訂頻道**：使用者可新增 YouTube 影片/頻道或 HTTP(S) 音訊串流，資料只儲存於目前瀏覽器的 `localStorage`。
+- **JSON 備份還原**：可匯出 JSON 檔案，也可從 `.json` 檔案或文字貼上內容匯入；匯入會覆蓋目前自訂頻道並先要求確認。
+- **訪客統計**：啟動後延遲背景寫入 Firestore `visitor_logs`，包含裝置 ID、時間、User-Agent、語言、螢幕解析度、來源頁、IP、國家與城市。
+- **離線快取**：Service Worker (`sw.js`) 使用 Stale-While-Revalidate 快取同網域 App Shell；外部 CDN、YouTube 與音訊串流不會被快取。
+
+本專案目前**不包含** RSS 新聞聚合、AI 新聞摘要或文字轉語音功能；README 與程式碼均不應將這些列為目前功能。
+
+## ⚠️ 使用限制與資料流向
+
+- 影音與廣播內容由 YouTube、各廣播服務及第三方串流網址提供，頻道可能因版權、來源下線、網址失效或 CORS 政策而無法播放。
+- YouTube 是否允許第三方嵌入由頻道擁有者決定；嵌入遭拒時只能改在 YouTube 網站播放。
+- 行動瀏覽器可能阻擋自動播放，請直接點擊頻道或播放按鈕授予使用者手勢。
+- Firebase SDK、ipapi.co、YouTube API、Lucide、Hls.js 與動態解析代理均為外部服務，離線或服務故障時相關功能會失效。
+- 訪客統計會在頁面初始化約 1.5 秒後背景執行；IP 與概略地理資訊由 ipapi.co 回傳後寫入 Firebase。正式部署前應另行提供隱私權政策與資料保存期限說明。
 
 ## 🔧 常見問題與除錯
 
@@ -173,9 +193,15 @@ npx serve .
 
 ## 📄 版權與授權
 
-本專案採用 **MIT License**（`LICENSE`）。
+本專案採用 **MIT License**（詳見根目錄之 `LICENSE` 檔案）。
 - 圖示使用 **Lucide Icons**（MIT），向量圖 `icon.svg` 為自製。
 - 音訊串流與 YouTube API 採用各自服務條款。
+
+## 🔒 隱私權與資料收集告知
+
+- **訪客統計與地理資訊**：本應用程式在載入後約 1.5 秒會在背景發送請求至 `ipapi.co` 查詢概略 IP 地理位置（國家、城市），並連線至 Firebase Firestore 記錄進站資料（包含隨機裝置 ID、時間、User-Agent、語言、螢幕解析度、來源頁及概略 IP 地理資訊），用於流量與使用者分佈統計。
+- **本機資料儲存**：使用者建立或匯入的自訂頻道僅儲存在目前瀏覽器的 `localStorage` 中，不會上傳至任何伺服器。
+- 若您對隱私資料收集有疑慮，可透過瀏覽器阻擋第三方請求或停用指令碼。
 
 ## 🙏 致謝
 
